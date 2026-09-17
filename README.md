@@ -2,7 +2,7 @@
 
 ‘사이’는 짧은 글로 일상을 나누는 SNS 과제 앱입니다. 원문은 [docs/assignment.md](docs/assignment.md), 구현 계약은 [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)에 보존합니다.
 
-공개 배포 URL: 아직 없음. P0 앱, P1 가입·로그인·프로필 설정·게시글, P2 사람 목록·프로필 방문·팔로우와 해제·관계 목록·댓글·한 단계 답글을 구현했습니다. 과제 전용 프로젝트의 초기 SQL 적용과 익명 로그인 비활성은 소유자가 확인했습니다. 승인된 실제 점검 계정 A·B로 앱 HTTP 요청과 DB 저장·조회·접근 거절을 확인했습니다. P3에서 실제 Chromium의 로그인·작성·답글·팔로우, 390px/1440px 화면, 키보드 이동·초안 보존·계정 전환·세션 갱신을 확인했습니다. 반복 가능한 실제 접근 검사와 CI 파일을 추가했습니다. GitHub에서의 CI 실행과 공개 배포 체험은 아직 미검증입니다. 상세 증거는 [docs/verification.md](docs/verification.md)에 구분해 기록했습니다.
+공개 배포 URL: 아직 없음. P0 앱, P1 가입·로그인·프로필 설정·게시글, P2 사람 목록·프로필 방문·팔로우와 해제·관계 목록·댓글·한 단계 답글을 구현했습니다. 과제 전용 프로젝트의 초기 SQL 적용과 익명 로그인 비활성은 소유자가 확인했습니다. 승인된 실제 점검 계정 A·B로 앱 HTTP 요청과 DB 저장·조회·접근 거절을 확인했습니다. P3에서 실제 Chromium의 로그인·작성·답글·팔로우, 390px/1440px 화면, 키보드 이동·초안 보존·계정 전환·세션 갱신을 확인했습니다. 반복 가능한 실제 접근 검사와 CI 파일을 추가했습니다. P0~P3 구현을 `main`에 반영했고 GitHub CI의 설치·검사·빌드가 통과했습니다. 공개 배포 체험은 아직 미검증입니다. 상세 증거는 [docs/verification.md](docs/verification.md)에 구분해 기록했습니다.
 
 ## 로컬 실행과 소유자 설정
 
@@ -23,7 +23,7 @@ Node 24와 npm, Git을 사용합니다. DB를 로컬에서 띄우지 않으며 �
 
 ## Netlify 연결: 소유자가 수행할 작업
 
-아직 공개 push·사이트 생성·배포는 하지 않았습니다. 검토한 변경을 이 저장소의 `main`에 반영한 뒤 Netlify에서 **Add new project → Import an existing project → GitHub → 이 저장소**를 선택합니다. Production branch는 `main`, 프레임워크는 Next.js, 빌드 명령은 `npm run check && npm run build`, publish 디렉터리는 `.next`, Node는 24입니다. [netlify.toml](netlify.toml)에 동일한 값을 둡니다.
+P0~P3 구현은 이 저장소의 `main`에 push했습니다. 사이트 생성·배포는 아직 수행하지 않았으며, 소유자 요청에 따라 교차 검토와 디자인 수정을 먼저 진행할 예정입니다. 이후 P4에서 Netlify의 **Add new project → Import an existing project → GitHub → 이 저장소**를 선택합니다. Production branch는 `main`, 프레임워크는 Next.js, 빌드 명령은 `npm run check && npm run build`, publish 디렉터리는 `.next`, Node는 24입니다. [netlify.toml](netlify.toml)에 동일한 값을 둡니다.
 
 **Project configuration → Environment variables**에 `.env.example`의 두 이름으로 실제 값을 등록하고 Builds와 Functions 런타임에 전달되도록 설정합니다. Free 플랜·기존 허용 사용량에서만 진행합니다. Netlify의 기본 Next.js 어댑터를 사용하며 정적 export로 바꾸지 않습니다. Server Actions와 쿠키 세션을 배포에서도 확인합니다. [Netlify 공식 Next.js 안내](https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/)
 
@@ -44,7 +44,7 @@ Next.js 16의 `proxy.ts`와 `@supabase/ssr` 쿠키 갱신을 구성하고, 보�
 - `npm run build`: 실제 DB 연결 없이 배포용 앱을 빌드합니다. DB 조회 페이지는 동적 처리합니다.
 - migration: 테이블 제약, RLS, 입력 가능한 열을 명시합니다. 적용·실제 권한 검사는 별도 증거가 필요합니다.
 - `npm run test:access`: [scripts/check-access.mjs](scripts/check-access.mjs)가 실제 Supabase 일반 사용자·익명 Data API의 소유권·댓글 계층·팔로우 제약을 검사합니다. 승인된 과제 프로젝트·기존 A·B 계정에서 실행해 통과했습니다.
-- [.github/workflows/ci.yml](.github/workflows/ci.yml): `main` push·PR에서 Node 24로 `npm ci` → `npm run check` → `npm run build`를 수행합니다. 읽기 권한만 부여하고 실제 DB·Codex 자격 증명은 사용하지 않습니다. 별도 소스 복사본에서 같은 명령과 빌드용 비실제 설정으로 검증했으며, GitHub 러너의 실행 결과는 아직 없습니다.
+- [.github/workflows/ci.yml](.github/workflows/ci.yml): `main` push·PR에서 Node 24로 `npm ci` → `npm run check` → `npm run build`를 수행합니다. 읽기 권한만 부여하고 실제 DB·Codex 자격 증명은 사용하지 않습니다. 별도 소스 복사본의 로컬 검증에 이어, 구현 commit `ee0c460`의 [GitHub CI 실행](https://github.com/kimkangmin0914/8around-sns/actions/runs/35212085700)도 세 명령 모두 통과했습니다.
 - 실행 결과·미검증은 `docs/verification.md`, AI 도구는 `tool.md`, 실제 대화 기록은 `exports/`에 있습니다.
 
 실제 접근 검사는 소유자가 확인한 **과제 전용 프로젝트와 프로필을 완료한 점검 계정 A·B**에서만 실행합니다. Git 제외 `.env.test.local`에 아래 이름으로 값을 직접 설정합니다. 현재 작업 환경에는 이미 준비돼 있으므로 새 계정 생성이나 SQL 재적용은 필요하지 않습니다.
@@ -73,6 +73,6 @@ URL의 프로젝트 참조와 별도 확인값이 다르거나 두 계정이 같
 
 ## 남은 필수 작업과 개선점
 
-남은 필수 작업은 GitHub CI 실행 확인과 P4 공개 배포·외부 신규 가입부터 전체 흐름·원본 대화 형식 확인·제출입니다. P3 로컬 결과를 GitHub 러너나 배포 성공으로 표시하지 않습니다. 실제 브라우저에서 긴 표시 이름과 전체 빈 초기 피드는 기존 점검 자료를 변경하지 않아 미검증이며, 글이 없는 프로필과 빈 다음 피드 페이지는 확인했습니다. OS 한글 입력기 조합의 수동 확인도 남아 있습니다.
+남은 필수 작업은 P4 공개 배포·외부 신규 가입부터 전체 흐름·원본 대화 형식 확인·제출입니다. 소유자 요청에 따라 교차 검토·디자인 수정을 먼저 진행하며 P4는 아직 착수하지 않습니다. GitHub CI 성공은 공개 배포 성공을 의미하지 않습니다. 실제 브라우저에서 긴 표시 이름과 전체 빈 초기 피드는 기존 점검 자료를 변경하지 않아 미검증이며, 글이 없는 프로필과 빈 다음 피드 페이지는 확인했습니다. OS 한글 입력기 조합의 수동 확인도 남아 있습니다.
 
 추가 시간이 있다면 이메일 확인·계정 복구, 남용 방어, 개발/제출 환경 분리, 브라우저 자동 회귀 검사를 개선합니다. 위 필수 미완료를 선택 개선으로 간주하지 않습니다.
