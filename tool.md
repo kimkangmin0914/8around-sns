@@ -2,15 +2,25 @@
 
 | 항목                                                  | 실제 사용 용도                                                                                                                                                                        |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OpenAI Codex (설치 CLI 0.154.0, 현재 Codex 작업 세션) | 기존 문서·작업 상태 확인, P0/P1/P2/P3 구현, 검사 실행·오류 수정, 실제 세션 기록 보존                                                                                                  |
+| OpenAI Codex (설치 CLI 0.154.0, 현재 Codex 작업 세션) | 기존 문서·작업 상태 확인, P0/P1/P2/P3/P3.5 구현, 검사 실행·오류 수정, 실제 세션 기록 보존                                                                                             |
 | OpenAI Docs 스킬                                      | Codex 비대화형 기록과 내보내기 방법의 공식 문서 확인                                                                                                                                  |
 | Codex 셸·파일 패치 도구                               | 소스 수정, npm 설치·검사·빌드, 설정 값을 출력하지 않는 공개 연결 점검                                                                                                                 |
-| Codex 웹 조회                                         | Next.js·Supabase·PostgREST·shadcn/ui·Netlify·GitHub Actions·Playwright·Codex의 현재 공식 구성·라이선스 확인                                                                           |
+| Codex 웹 조회                                         | Next.js·Supabase·PostgREST·shadcn/ui·Netlify·GitHub Actions·Playwright·Codex·SEED·W3C의 현재 공식 구성·라이선스 확인                                                                  |
 | Playwright 1.63.0 + Chromium 153.0.8010.12            | Git 제외 점검 폴더에서 실제 브라우저 로그인·저장·모바일·키보드·실패·세션 전환 검증. 앱 의존성·배포 구성에는 추가하지 않음. [공식 Library 사용법](https://playwright.dev/docs/library) |
 | AGENTS.md·IMPLEMENTATION_PLAN.md                      | 사용자가 제공한 작업 규칙과 구현 계약 적용                                                                                                                                            |
 
+P3.5에서는 기존에 설치된 `oh-my-design-cli@2.0.0`의 `--version`과 `install-skills --help`를 실행해 버전·최소 설치 옵션을 확인했습니다. 새 설치나 덮어쓰기는 하지 않았습니다. 사용자 정정에 따라 미공개 2.0.1은 사용하지 않았으며 앱 의존성·CI에도 OMD를 추가하지 않았습니다.
+
+| 설치 경로와 frontmatter 이름                                | 실제 적용 범위                                                                                                         |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `.agents/skills/omd-apply/SKILL.md` · `omd:apply`           | 독립 `DESIGN.md`를 기존 셸·목록·폼에 적용. 기존 동작·데이터·조회 경계를 유지.                                          |
+| `.agents/skills/omd-feel/SKILL.md` · `omd:feel`             | 실제 색 대비·조작 크기·포커스·상태·간격·동작 감소 점검. 프로젝트 토큰을 우선하고 휴리스틱을 WCAG로 표현하지 않음.      |
+| `.agents/skills/omd-slop-audit/SKILL.md` · `omd:slop-audit` | 동봉 pattern catalog를 읽고 같은 데이터·route·viewport 전후의 홍보 문구·본문 위계·상태를 비교. 맛 점수나 AI 확률 없음. |
+
+세 스킬은 현재 Codex의 사용 가능 스킬 목록에 노출되며 각 SKILL.md를 읽었습니다. 전용 스킬 호출 API가 제공되지 않아 본 에이전트가 지침을 직접 적용하는 fallback으로 처리했습니다. 런타임 스킬 호출 완료 또는 전문 역할 실행으로 기록하지 않습니다. 설치 파일과 캐시된 2.0.0 배포물의 차이는 apply/slop-audit의 채널용 frontmatter 이름과 설치 표식·빈 줄이며 feel 본문도 일치했습니다. GitHub의 지정 commit과 npm 배포물의 동일성을 검증한 것으로 해석하지 않습니다. 최소 설치에 없는 init/harness·sub-agents·자동 hooks·proof-policy·MCP·이미지 생성·전체 카탈로그를 활성화하지 않았습니다. 스킬의 별도 proof 실행 프레임워크는 사용자 문서의 제한에 따라 사용하지 않고 기존 Vitest·Playwright 환경을 사용했습니다.
+
 AI 라이브러리·에이전트 프레임워크·병렬 에이전트·추가 MCP 플러그인은 앱 구현에 사용하지 않았습니다. 앱 런타임에는 AI 기능이나 API 호출이 없습니다. 앱 의존성 목록은 `package.json`과 `THIRD_PARTY_NOTICES.md`를 참조합니다.
 
-실제 입력·응답·도구 이벤트는 `scripts/export-session.mjs`로 현재 워크스페이스의 Codex rollout에서 추출합니다. 원본은 Git 제외 경로 `.ai-raw/`에 보존하며 `.codex/auth.json`은 읽지 않습니다. 설정 파일 값은 스크립트가 런타임에 읽어 제거하고 값 자체를 출력하지 않습니다. `exports/codex-session.jsonl`은 실제 이벤트이며 요약을 대화로 대신하지 않습니다. 이미지의 픽셀에는 텍스트 비밀 제거를 적용할 수 없어 로컬 화면 첨부는 제출용 기록에서 표시자로 제외하고 원본을 `.ai-raw/`에 보존합니다. 로컬 화면 이미지를 공개 배포 증거로 제출하지 않습니다.
+실제 입력·응답·도구 이벤트는 `scripts/export-session.mjs`로 현재 워크스페이스의 Codex rollout에서 추출합니다. 원본은 Git 제외 경로 `.ai-raw/`에 보존하며 `.codex/auth.json`은 읽지 않습니다. 설정 파일 값은 스크립트가 런타임에 읽어 제거하고 값 자체를 출력하지 않습니다. `exports/codex-<session SHA256>-<source SHA256>.jsonl`은 실제 이벤트이며 요약을 대화로 대신하지 않습니다. 같은 원본 바이트의 재내보내기는 동일 파일을 확인하고, 다른 세션 또는 변경된 원본은 새 파일을 추가합니다. 충돌한 기존 파일·symlink에는 쓰지 않습니다. 기존 `exports/codex-session.jsonl`도 원본 hash를 대조한 뒤 보존했습니다. JSON 중첩 8단계·객체 32단계·문자열 512 KiB 등 명시한 검사 범위를 초과하면 제외 표식을 남기거나 공개 출력을 중단합니다. 원문·이스케이프 가림을 가짜 값으로 검사했지만 임의 인코딩 전부의 안전성을 보장하지 않습니다. 이미지의 픽셀에는 텍스트 비밀 제거를 적용할 수 없어 로컬 화면 첨부는 제출용 기록에서 표시자로 제외하고 원본을 `.ai-raw/`에 보존합니다. 로컬 화면 이미지를 공개 배포 증거로 제출하지 않습니다.
 
 설치 CLI의 `--help`에서는 전용 transcript export 명령을 확인하지 못했습니다. 이번 파일은 기존 세션 rollout에서 추출한 대안 형식이며 과제의 `export` 명령 요건 충족 여부는 제출 전 확인해야 합니다. 시스템 지침·내부 추론·중복 이벤트는 제외하며 사용자·응답·도구 결과의 내용은 비밀 제거 외 재작성하지 않습니다. 내보내기는 실행 시점의 스냅샷이므로 마지막 작업 후 다시 실행해야 합니다. 이후 비대화형 작업에는 [공식 `codex exec --json` 안내](https://developers.openai.com/codex/noninteractive/)에 따라 입력 원문·JSON 이벤트·stderr·종료 상태를 함께 보존할 수 있습니다.

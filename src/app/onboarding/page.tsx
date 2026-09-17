@@ -3,7 +3,6 @@ import { getViewer } from "@/lib/viewer";
 import { ProfileForm } from "@/components/profile-form";
 import { SessionBoundary } from "@/components/session-boundary";
 import { ServiceError } from "@/components/service-error";
-import { AccountMenu } from "@/components/account-menu";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "공개 프로필 설정" };
@@ -15,8 +14,7 @@ export default async function Onboarding() {
   return (
     <section className="auth-panel surface stack">
       <header className="page-heading">
-        <h1>어떻게 불러드릴까요?</h1>
-        <AccountMenu />
+        <h1>공개 프로필 설정</h1>
       </header>
       <p className="muted">가입한 계정으로 공개 프로필만 설정하면 됩니다.</p>
       {viewer.status === "error" ? (
@@ -25,7 +23,11 @@ export default async function Onboarding() {
           href="/onboarding"
         />
       ) : (
-        <SessionBoundary key={viewer.id} userId={viewer.id}>
+        <SessionBoundary
+          key={viewer.id}
+          userId={viewer.id}
+          generation={crypto.randomUUID()}
+        >
           <ProfileForm userId={viewer.id} />
         </SessionBoundary>
       )}

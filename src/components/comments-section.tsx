@@ -1,3 +1,4 @@
+import { Avatar } from "@/components/avatar";
 import Link from "next/link";
 import {
   readRoots,
@@ -14,30 +15,36 @@ import { ServiceError } from "@/components/service-error";
 
 function CommentBody({ comment }: { comment: ThreadComment }) {
   return (
-    <>
-      <header className="post-header">
-        {comment.author ? (
-          <Link className="post-author" href={`/u/${comment.author.username}`}>
-            {comment.author.display_name}
-          </Link>
-        ) : (
-          <span className="post-author">알 수 없는 작성자</span>
-        )}
-        <span className="post-meta">
-          @{comment.author?.username ?? "unknown"}
-        </span>
-        <time className="post-meta" dateTime={comment.created_at}>
-          {new Intl.DateTimeFormat("ko-KR", {
-            timeZone: "Asia/Seoul",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }).format(new Date(comment.created_at))}
-        </time>
-      </header>
-      <p className="post-body">{comment.content}</p>
-    </>
+    <div className="comment-content">
+      <Avatar name={comment.author?.display_name} />
+      <div className="post-copy">
+        <header className="post-header">
+          {comment.author ? (
+            <Link
+              className="post-author"
+              href={`/u/${comment.author.username}`}
+            >
+              {comment.author.display_name}
+            </Link>
+          ) : (
+            <span className="post-author">알 수 없는 작성자</span>
+          )}
+          <span className="post-meta">
+            @{comment.author?.username ?? "unknown"}
+          </span>
+          <time className="post-meta" dateTime={comment.created_at}>
+            {new Intl.DateTimeFormat("ko-KR", {
+              timeZone: "Asia/Seoul",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(new Date(comment.created_at))}
+          </time>
+        </header>
+        <p className="post-body">{comment.content}</p>
+      </div>
+    </div>
   );
 }
 
@@ -63,7 +70,7 @@ export async function CommentsSection({
     const result = await readRoot(postId, thread);
     if (!result.ok) selectionError = "답글 대상을 불러오지 못했습니다.";
     else if (!result.comment)
-      selectionError = "이 글의 최상위 댓글을 답글 대상으로 선택해 주세요.";
+      selectionError = "이 글에 직접 남긴 댓글을 답글 대상으로 선택해 주세요.";
     else selected = result.comment;
   }
   const replies = selected ? await readReplies(selected, replyOffset) : null;
@@ -237,7 +244,11 @@ export async function CommentsSection({
     </section>
   );
   return viewer.status === "ready" ? (
-    <SessionBoundary key={`${viewer.id}:${postId}`} userId={viewer.id}>
+    <SessionBoundary
+      key={`${viewer.id}:${postId}`}
+      userId={viewer.id}
+      generation={crypto.randomUUID()}
+    >
       {content}
     </SessionBoundary>
   ) : (

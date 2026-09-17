@@ -9,3 +9,7 @@ exports
 .ai-raw
 public/fonts
 THIRD_PARTY_NOTICES.md
+
+.agents/skills/omd-apply/
+.agents/skills/omd-feel/
+.agents/skills/omd-slop-audit/

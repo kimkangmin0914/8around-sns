@@ -1,3 +1,4 @@
+import { Avatar } from "@/components/avatar";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getViewer } from "@/lib/viewer";
@@ -7,7 +8,6 @@ import { PAGE_SIZE, validateOffset } from "@/lib/validation";
 import { FollowButton } from "@/components/follow-button";
 import { PersonRow } from "@/components/person-row";
 import { PostRow } from "@/components/post-row";
-import { AccountMenu } from "@/components/account-menu";
 import { SessionBoundary } from "@/components/session-boundary";
 import { ServiceError } from "@/components/service-error";
 
@@ -56,15 +56,10 @@ export default async function ProfilePage({
     <>
       <header className="page-heading">
         <h1>프로필</h1>
-        {viewer.status === "ready" && viewer.id === profile.id && (
-          <AccountMenu />
-        )}
       </header>
       <section className="profile-header stack" aria-label="사용자 소개">
         <div className="profile-identity">
-          <span className="avatar" aria-hidden="true">
-            {Array.from(profile.display_name)[0]}
-          </span>
+          <Avatar name={profile.display_name} />
           <div className="person-copy">
             <h2>{profile.display_name}</h2>
             <p className="post-meta">@{profile.username}</p>
@@ -74,9 +69,13 @@ export default async function ProfilePage({
         {viewer.status === "ready" &&
           relationship &&
           (relationship.ok ? (
-            <SessionBoundary key={viewer.id} userId={viewer.id}>
+            <SessionBoundary
+              key={viewer.id}
+              userId={viewer.id}
+              generation={crypto.randomUUID()}
+            >
               <FollowButton
-                key={`${profile.id}:${relationship.following}`}
+                key={profile.id}
                 userId={viewer.id}
                 targetId={profile.id}
                 following={relationship.following}
@@ -127,12 +126,16 @@ export default async function ProfilePage({
         ) : posts.posts.length ? (
           posts.posts.map((post) => <PostRow key={post.id} post={post} />)
         ) : (
-          <p className="empty muted">아직 작성한 글이 없습니다.</p>
+          <p className="empty muted">
+            {offset > 0
+              ? "이 페이지에 표시할 글이 없습니다. 처음 목록을 확인해 주세요."
+              : "아직 작성한 글이 없습니다."}
+          </p>
         ))}
       {connections &&
         (!connections.ok ? (
           <ServiceError
-            message="관계 목록을 불러오지 못했습니다."
+            message={`${tab === "followers" ? "팔로워" : "팔로잉"} 목록을 불러오지 못했습니다.`}
             href={`${href}?tab=${tab}`}
           />
         ) : connections.people.length ? (
@@ -143,8 +146,9 @@ export default async function ProfilePage({
           </ul>
         ) : (
           <p className="empty muted">
-            아직 {tab === "followers" ? "팔로워가" : "팔로잉한 사람이"}{" "}
-            없습니다.
+            {offset > 0
+              ? `이 페이지에 표시할 ${tab === "followers" ? "팔로워가" : "팔로잉한 사람이"} 없습니다. 처음 목록을 확인해 주세요.`
+              : `아직 ${tab === "followers" ? "팔로워가" : "팔로잉한 사람이"} 없습니다.`}
           </p>
         ))}
       <div className="feed-footer actions">

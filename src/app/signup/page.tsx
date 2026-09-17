@@ -14,12 +14,12 @@ export default async function Signup() {
   return (
     <section className="auth-panel surface stack">
       <div>
-        <p className="eyebrow">사이에 오신 걸 환영해요</p>
         <h1>회원가입</h1>
       </div>
       <p className="hint">
-        이메일 확인 메일을 보내지 않습니다. 이메일 소유권 확인과 메일 기반 계정
-        복구를 제공하지 않으므로 이메일과 비밀번호를 정확히 입력해 주세요.
+        이메일 확인 메일을 보내지 않아 본인의 이메일인지 확인하지 않습니다.
+        이메일로 계정을 복구할 수도 없으니 이메일과 비밀번호를 정확히 입력해
+        주세요.
       </p>
       {viewer.status === "error" ? (
         <ServiceError href="/signup" />

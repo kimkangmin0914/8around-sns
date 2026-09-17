@@ -21,7 +21,6 @@ export default async function PeoplePage({
     <>
       <header className="page-heading">
         <div>
-          <p className="eyebrow">새로운 이야기를 만나세요</p>
           <h1>사람들</h1>
         </div>
       </header>

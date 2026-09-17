@@ -627,3 +627,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## oh-my-design CLI 2.0.0 · 선택한 디자인 스킬
+
+- 출처: https://github.com/kwakseongjae/oh-my-design / npm `oh-my-design-cli@2.0.0`.
+- 기존 설치된 `.agents/skills/omd-apply`, `omd-feel`, `omd-slop-audit`와 동봉 참고 자료만 보존·사용합니다. 스킬 CLI나 helper는 앱 런타임·CI의 의존성이 아닙니다.
+- 배포물의 MIT License, Copyright (c) 2026 oh-my-design 사본: [.agents/skills/LICENSE](.agents/skills/LICENSE). 기존 vendor 본문은 수정하지 않았습니다. 설치기가 채널별 이름·표식을 추가한 상태를 유지합니다.
+- 사용자 지정 GitHub source commit `15ff013933b37d1800e05c75e7680ed17e56f94b`의 웹 조회는 실패했습니다. npm 배포물과 이 commit의 동일성을 주장하지 않습니다.
+- OMD karrot 카탈로그는 제3자 분석 참고이고 `verified v2`가 당근의 승인·현재 앱 전체 측정을 뜻하지 않습니다. 현행 [SEED 문서](https://seed-design.io/get-started)의 제품 상태 원리만 참고했습니다. SEED v2와 마케팅 수치를 혼합하지 않았습니다.
+- 당근 이름·로고·사진·캐릭터·전용 글꼴·문구·타사 HTML/CSS/스크린샷을 앱 자산으로 사용하지 않았으며 `@seed-design/*`도 설치하지 않았습니다. ‘사이’의 색·치수·배치 계약은 프로젝트 소유 [DESIGN.md](DESIGN.md)에 있습니다.

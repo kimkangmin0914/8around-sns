@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { completeProfile } from "@/actions/auth";
 import { validateProfile } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
+import { actionMessage } from "@/components/action-message";
 import { uncertainWrite, type ActionResult } from "@/lib/action-result";
 
 export function ProfileForm({ userId }: { userId: string }) {
@@ -110,7 +111,9 @@ export function ProfileForm({ userId }: { userId: string }) {
           role={result.status === "success" ? "status" : "alert"}
           className={result.status === "success" ? "success" : "error"}
         >
-          {result.message}
+          {result.status === "uncertain"
+            ? "저장 결과를 확인하지 못했습니다. 입력한 내용은 남아 있습니다."
+            : actionMessage(result.message)}
         </p>
       )}
       <Button type="submit" disabled={pending}>

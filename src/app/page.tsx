@@ -4,7 +4,6 @@ import { getViewer } from "@/lib/viewer";
 import { readPosts } from "@/lib/posts";
 import { PAGE_SIZE, validateOffset } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
-import { AccountMenu } from "@/components/account-menu";
 import { PostComposer } from "@/components/post-composer";
 import { PostRow } from "@/components/post-row";
 import { ServiceError } from "@/components/service-error";
@@ -33,20 +32,14 @@ export default async function Home({
   return (
     <>
       <header className="page-heading">
-        <div>
-          <p className="eyebrow">사람과 사람 사이</p>
-          <h1>전체 글</h1>
-        </div>
-        {viewer.status === "ready" ? (
-          <AccountMenu />
-        ) : (
-          <Button variant="ghost" asChild>
-            <Link href="/login">로그인</Link>
-          </Button>
-        )}
+        <h1>전체 글</h1>
       </header>
       {viewer.status === "ready" ? (
-        <SessionBoundary key={viewer.id} userId={viewer.id}>
+        <SessionBoundary
+          key={viewer.id}
+          userId={viewer.id}
+          generation={crypto.randomUUID()}
+        >
           <PostComposer
             userId={viewer.id}
             displayName={viewer.profile.display_name}
@@ -55,13 +48,8 @@ export default async function Home({
       ) : viewer.status === "error" ? (
         <ServiceError message="로그인 상태를 확인하지 못했습니다." />
       ) : (
-        <section className="surface stack">
-          <h2>당신의 하루를 들려주세요.</h2>
-          <p className="muted">
-            가벼운 생각부터 오래 남은 이야기까지.
-            <br />
-            여기서 함께 나눠요.
-          </p>
+        <section className="guest-intro stack">
+          <p>글과 댓글을 남기려면 로그인해 주세요.</p>
           <div className="actions">
             <Button asChild>
               <Link href="/signup">가입하고 글 쓰기</Link>

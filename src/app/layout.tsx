@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AccountMenu } from "@/components/account-menu";
+import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/navigation";
 import { getViewer } from "@/lib/viewer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "사이 · 일상이 만나는 곳", template: "%s · 사이" },
-  description: "가벼운 생각부터 오늘의 이야기까지, 사람과 사람 사이.",
+  title: { default: "단풍 · 전체 글", template: "%s · 단풍" },
+  description: "글을 읽고 이야기를 나누는 단풍.",
 };
 
 export const dynamic = "force-dynamic";
@@ -28,17 +30,21 @@ export default async function RootLayout({
           본문으로 건너뛰기
         </a>
         <div className="shell">
-          <aside className="sidebar">
-            <Link href="/" className="brand" aria-label="사이 홈">
-              사이<span className="muted">.</span>
+          <header className="masthead">
+            <Link href="/" className="brand" aria-label="단풍 홈">
+              단풍
             </Link>
             <Navigation profilePath={profilePath} />
-            <p className="sidebar-note">
-              사람과 사람 사이,
-              <br />
-              작은 이야기들이 모이는 곳.
-            </p>
-          </aside>
+            <div className="account-actions">
+              {viewer.status === "ready" || viewer.status === "onboarding" ? (
+                <AccountMenu />
+              ) : (
+                <Button variant="ghost" asChild>
+                  <Link href="/login">로그인</Link>
+                </Button>
+              )}
+            </div>
+          </header>
           <main id="main" className="main">
             {children}
           </main>

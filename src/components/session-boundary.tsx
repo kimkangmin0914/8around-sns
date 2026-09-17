@@ -7,20 +7,24 @@ import { isMissingSession } from "@/lib/auth-session";
 
 export function SessionBoundary({
   userId,
+  generation,
   children,
 }: {
   userId: string;
+  generation: string;
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [changed, setChanged] = useState(false);
+  const [blockedGeneration, setBlockedGeneration] = useState<string | null>(
+    null,
+  );
   useEffect(() => {
     const client = createClient();
     let active = true;
     let checking = false;
     const refreshFor = (id: string | undefined) => {
       if (active && id !== userId) {
-        setChanged(true);
+        setBlockedGeneration(generation);
         router.refresh();
       }
     };
@@ -53,8 +57,10 @@ export function SessionBoundary({
       window.removeEventListener("pageshow", checkSession);
       document.removeEventListener("visibilitychange", checkSession);
     };
-  }, [router, userId]);
-  if (changed)
+  }, [router, userId, generation]);
+  // Only a fresh server render with verified identity can release this block.
+  // Ordinary refreshes keep children mounted; mismatches discard old drafts.
+  if (blockedGeneration === generation)
     return (
       <p role="status" className="notice">
         로그인 상태가 바뀌었습니다. 화면을 다시 확인하고 있습니다.

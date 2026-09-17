@@ -1,144 +1,158 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile, lstat, chmod } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { parseEnv } from "node:util";
 import { createHash } from "node:crypto";
+import { pathToFileURL } from "node:url";
+import { createRedactor, LIMITS } from "./export-redaction.mjs";
 
-// Transform actual session records only. Never synthesize a conversation.
-const source = process.argv[2];
-if (!source || !basename(source).endsWith(".jsonl")) {
-  throw new Error(
-    "Usage: node scripts/export-session.mjs /path/to/rollout.jsonl",
-  );
-}
-const raw = await readFile(source, "utf8");
-const rows = raw
-  .split("\n")
-  .filter(Boolean)
-  .map((line) => JSON.parse(line));
-if (
-  !rows.some(
-    (row) => row.type === "session_meta" && row.payload.cwd === process.cwd(),
-  )
-) {
-  throw new Error("The session does not belong to this workspace.");
-}
-const stamp = new Date().toISOString().replaceAll(":", "-");
-await mkdir(".ai-raw", { recursive: true });
-await copyFile(source, resolve(".ai-raw", `${stamp}.jsonl`));
-const knownValues = [];
-for (const file of [".env.local", ".env.test.local"]) {
-  try {
-    knownValues.push(
-      ...Object.values(parseEnv(await readFile(file, "utf8"))).filter(
-        (value) => value.length >= 4,
-      ),
-    );
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-  }
-}
-let replacements = 0;
-const sanitize = (value) => {
-  if (typeof value === "string") {
-    // Tool output can itself contain JSON encoded one or more times.
-    value = value.replace(
-      /((?:encryptionKey|encryption\.key)\\*"\s*:\s*\\*")[A-Za-z0-9+/=]{20,}/g,
-      (_match, prefix) => {
-        replacements++;
-        return `${prefix}[REDACTED_BUILD_KEY]`;
-      },
-    );
-    for (const secret of knownValues)
-      value = value.replaceAll(secret, () => {
-        replacements++;
-        return "[REDACTED_ENV_VALUE]";
-      });
-    for (const pattern of [
-      /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g,
-      /\b(?:sb_secret_|sb_publishable_|sk-proj-|sk-|ghp_|github_pat_)[A-Za-z0-9_-]{16,}\b/g,
-    ])
-      value = value.replace(pattern, () => {
-        replacements++;
-        return "[REDACTED_TOKEN]";
-      });
-    return value;
-  }
-  if (Array.isArray(value)) return value.map(sanitize);
-  if (value && typeof value === "object" && value.type === "input_image") {
-    // Text redaction cannot inspect pixels. Keep local screenshots in the private
-    // raw record, and omit their binary attachment from the public transcript.
-    replacements++;
-    return {
-      type: "input_image",
-      image_url: "[REDACTED_LOCAL_IMAGE_ATTACHMENT]",
-    };
-  }
-  if (value && typeof value === "object")
-    return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [key, sanitize(item)]),
-    );
-  return value;
-};
-const items = rows
-  .filter((row) => row.type === "response_item")
-  .flatMap((row) => {
-    const item = row.payload;
-    if (item.type === "message" && ["user", "assistant"].includes(item.role))
-      return [
-        {
-          timestamp: row.timestamp,
-          type: item.type,
-          role: item.role,
-          content: item.content,
-          phase: item.phase,
-        },
-      ];
-    if (
-      [
-        "custom_tool_call",
-        "custom_tool_call_output",
-        "function_call",
-        "function_call_output",
-      ].includes(item.type)
-    ) {
-      const { type, call_id, name, input, arguments: args, output } = item;
-      return [
-        {
-          timestamp: row.timestamp,
-          type,
-          call_id,
-          name,
-          input,
-          arguments: args,
-          output,
-        },
-      ];
+const hash = (value) => createHash("sha256").update(value).digest("hex");
+export async function loadKnownValues(cwd) {
+  const known = [];
+  for (const file of [".env.local", ".env.test.local"]) {
+    try {
+      known.push(
+        ...Object.values(parseEnv(await readFile(resolve(cwd, file), "utf8"))),
+      );
+    } catch (error) {
+      if (error.code !== "ENOENT")
+        throw new Error("Cannot read redaction settings.");
     }
-    return [];
-  });
+  }
+  for (const name of ["GITHUB_TOKEN", "GH_TOKEN"])
+    if (process.env[name]) known.push(process.env[name]);
+  return known;
+}
+async function directory(path) {
+  await mkdir(path, { recursive: true, mode: 0o700 });
+  const info = await lstat(path);
+  if (!info.isDirectory() || info.isSymbolicLink())
+    throw new Error("Export directories must be real directories.");
+}
+async function immutableWrite(path, content) {
+  try {
+    await writeFile(path, content, { flag: "wx", mode: 0o600 });
+  } catch (error) {
+    if (error.code !== "EEXIST")
+      throw new Error("Cannot write export snapshot.");
+    const info = await lstat(path);
+    if (
+      !info.isFile() ||
+      info.isSymbolicLink() ||
+      (await readFile(path, "utf8")) !== content
+    )
+      throw new Error("Snapshot collision: existing content was preserved.");
+    await chmod(path, 0o600);
+  }
+}
+export async function exportSession(source, cwd = process.cwd()) {
+  if (!source || !basename(source).endsWith(".jsonl"))
+    throw new Error(
+      "Usage: node scripts/export-session.mjs /path/to/rollout.jsonl",
+    );
+  const raw = await readFile(source, "utf8");
+  const sourceHash = hash(raw);
+  // Save exactly the bytes read, even if the live rollout keeps growing.
+  await directory(resolve(cwd, ".ai-raw"));
+  await immutableWrite(
+    resolve(cwd, ".ai-raw", `rollout-${sourceHash}.jsonl`),
+    raw,
+  );
+  if (Buffer.byteLength(raw) > 64 * 1024 * 1024)
+    throw new Error("Source exceeds 64 MiB; private snapshot retained.");
+  let rows;
+  try {
+    rows = raw
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => JSON.parse(line));
+  } catch {
+    throw new Error("Invalid source JSONL; private snapshot retained.");
+  }
+  const metas = rows.filter((row) => row.type === "session_meta");
+  if (
+    metas.length !== 1 ||
+    metas[0].payload?.cwd !== cwd ||
+    typeof metas[0].payload.id !== "string" ||
+    !metas[0].payload.id
+  )
+    throw new Error(
+      "One identified session belonging to this workspace is required.",
+    );
+  const sessionHash = hash(metas[0].payload.id);
+  const items = rows
+    .filter((row) => row.type === "response_item")
+    .flatMap((row) => {
+      const item = row.payload;
+      if (item.type === "message" && ["user", "assistant"].includes(item.role))
+        return [
+          {
+            timestamp: row.timestamp,
+            type: item.type,
+            role: item.role,
+            content: item.content,
+            phase: item.phase,
+          },
+        ];
+      if (
+        [
+          "custom_tool_call",
+          "custom_tool_call_output",
+          "function_call",
+          "function_call_output",
+        ].includes(item.type)
+      ) {
+        const { type, call_id, name, input, arguments: args, output } = item;
+        return [
+          {
+            timestamp: row.timestamp,
+            type,
+            call_id,
+            name,
+            input,
+            arguments: args,
+            output,
+          },
+        ];
+      }
+      return [];
+    });
+  if (
+    !items.some((item) => item.role === "user") ||
+    !items.some((item) => item.role === "assistant")
+  )
+    throw new Error("No actual conversation found.");
+  const { sanitize, stats } = createRedactor(await loadKnownValues(cwd));
+  const safe = items.map((item) => sanitize(item));
+  const metadata = {
+    type: "export_metadata",
+    format: "filtered-codex-rollout",
+    redaction_version: 2,
+    session_id_sha256: sessionHash,
+    source_sha256: sourceHash,
+    records: safe.length,
+    ...stats,
+    limits: LIMITS,
+    note: "Actual user/assistant/tool records, not a summary or native CLI export. System/developer instructions, reasoning and duplicate events omitted. Immutable snapshot; identical input is idempotent, changed input creates a new file. Unsupported or oversized content is explicitly excluded. Does not guarantee redaction of arbitrary encodings. Source bytes retained privately.",
+  };
+  const content =
+    [metadata, ...safe].map((item) => JSON.stringify(item)).join("\n") + "\n";
+  const filename = `codex-${sessionHash}-${sourceHash}.jsonl`;
+  await directory(resolve(cwd, "exports"));
+  await immutableWrite(resolve(cwd, "exports", filename), content);
+  return { filename, records: safe.length, ...stats };
+}
 if (
-  !items.some((item) => item.role === "user") ||
-  !items.some((item) => item.role === "assistant")
-)
-  throw new Error("No actual conversation found.");
-const sanitized = items.map(sanitize);
-await mkdir("exports", { recursive: true });
-const exported =
-  [
-    {
-      type: "export_metadata",
-      format: "filtered-codex-rollout",
-      exported_at: stamp,
-      source_sha256: createHash("sha256").update(raw).digest("hex"),
-      records: items.length,
-      redactions: replacements,
-      note: "Actual user/assistant/tool records; system/developer instructions, internal reasoning and duplicate events omitted. Not the official CLI transcript export. Snapshot ends before this export command completes.",
-    },
-    ...sanitized,
-  ]
-    .map((item) => JSON.stringify(item))
-    .join("\n") + "\n";
-await writeFile("exports/codex-session.jsonl", exported, { mode: 0o600 });
-console.log(
-  `Exported ${items.length} actual records; ${replacements} value/token redactions. Review before submission.`,
-);
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href
+) {
+  try {
+    console.log(JSON.stringify(await exportSession(process.argv[2])));
+  } catch (error) {
+    console.error(
+      error instanceof Error && !("code" in error)
+        ? error.message
+        : "Export failed; no settings printed.",
+    );
+    process.exitCode = 1;
+  }
+}

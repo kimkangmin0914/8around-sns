@@ -12,6 +12,7 @@ import {
 import { commentPageHref } from "@/lib/comment-page";
 import { uncertainWrite, type ActionResult } from "@/lib/action-result";
 import { Button } from "@/components/ui/button";
+import { actionMessage } from "@/components/action-message";
 
 export function CommentComposer({
   userId,
@@ -29,12 +30,22 @@ export function CommentComposer({
   const [content, setContent] = useState("");
   const [pending, setPending] = useState(false);
   const busy = useRef(false);
+  const restoreFocus = useRef(false);
   const [result, setResult] = useState<ActionResult | null>(null);
   const inputId = `comment-input-${parent?.id ?? "root"}`;
   const destination = commentPageHref(postId, parent ? offset : 0, parent?.id);
   if (!open)
     return (
-      <Button variant="ghost" onClick={() => setOpen(true)}>
+      <Button
+        variant="ghost"
+        ref={(button) => {
+          if (button && restoreFocus.current) {
+            restoreFocus.current = false;
+            button.focus();
+          }
+        }}
+        onClick={() => setOpen(true)}
+      >
         답글 쓰기
       </Button>
     );
@@ -98,7 +109,7 @@ export function CommentComposer({
       </div>
       <div className="form-footer">
         <span className="hint" id={`${inputId}-count`}>
-          {codePointLength(normalizeText(content))} / 500
+          {codePointLength(normalizeText(content))} / 500자
         </span>
         <div className="actions">
           {parent && (
@@ -106,24 +117,25 @@ export function CommentComposer({
               type="button"
               variant="ghost"
               disabled={pending}
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                restoreFocus.current = true;
+                setOpen(false);
+              }}
             >
               취소
             </Button>
           )}
-          <Button type="submit" disabled={pending}>
-            {pending
-              ? "남기고 있습니다…"
-              : parent
-                ? "답글 남기기"
-                : "댓글 남기기"}
+          <Button className="comment-submit" type="submit" disabled={pending}>
+            {pending ? "남기는 중…" : parent ? "답글 남기기" : "댓글 남기기"}
           </Button>
         </div>
       </div>
       <div id={`${inputId}-feedback`} aria-live="polite">
         {result && (
           <p className={result.status === "success" ? "success" : "error"}>
-            {result.message}
+            {result.status === "uncertain"
+              ? "저장 결과를 확인하지 못했습니다. 입력한 내용은 남아 있습니다."
+              : actionMessage(result.message)}
             {result.status === "success" && result.id && (
               <>
                 {" "}

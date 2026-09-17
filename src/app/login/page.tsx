@@ -14,7 +14,6 @@ export default async function Login() {
   return (
     <section className="auth-panel surface stack">
       <div>
-        <p className="eyebrow">다시 만나 반가워요</p>
         <h1>로그인</h1>
       </div>
       {viewer.status === "error" ? (

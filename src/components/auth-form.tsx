@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn, signUp } from "@/actions/auth";
 import { validateCredentials } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
+import { actionMessage } from "@/components/action-message";
 import type { ActionResult } from "@/lib/action-result";
 
 export function AuthForm({ mode }: { mode: "signup" | "login" }) {
@@ -80,7 +81,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
         />
         {signup && (
           <p id="password-hint" className="hint">
-            8자 이상, UTF-8 기준 72바이트 이내
+            8자 이상으로 입력해 주세요.
           </p>
         )}
       </div>
@@ -89,7 +90,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
           role={result.status === "success" ? "status" : "alert"}
           className={result.status === "success" ? "success" : "error"}
         >
-          {result.message}
+          {actionMessage(result.message)}
         </p>
       )}
       <Button type="submit" disabled={pending}>
