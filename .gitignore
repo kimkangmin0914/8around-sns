@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+.env*
+!.env.example
+.codex/
+.ai-raw/
+.netlify/
+playwright/.auth/
+test-results/
+playwright-report/
+*auth-state*.json
+*.log
+.DS_Store
