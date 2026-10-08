@@ -46,6 +46,8 @@
 
 - 배포 경로: `main` push → Netlify(Next.js Runtime) 빌드. 직전 배포 `468dbdf`가 실패한 원인은 빌드 캐시 `.netlify/`를 `eslint .`가 검사한 것이었고(Netlify 공개 배포 로그에서 확인), ESLint 무시 목록과 `netlify.toml`(빌드만 수행, 검사는 CI)로 해결했습니다.
 - 운영 DB 스키마는 바꾸지 않았습니다(기존 마이그레이션 그대로). 기존 운영 데이터도 그대로 둡니다.
+- `6185e26` push 결과: GitHub Actions [CI 37743352241](https://github.com/kimkangmin0914/8around-sns/actions/runs/37743352241) 두 작업 모두 성공(검사·빌드, Docker 로컬 Supabase의 DB 규칙 13개). Netlify `Production: main@6185e26 Published`, 59초.
+- 운영 주소 브라우저 확인(게스트, 시험 계정 생성 없음): 랜딩 헤드라인·커서·스크롤 문장, 운영 데이터로 그린 피드·사람들 벽·대화(긴 글 줄바꿈 포함)·게스트 로그인 안내, 디자인 노트. 콘솔 오류 0. 운영에서의 가입·쓰기 흐름은 로컬과 같은 코드·스키마이며, 운영 계정으로의 직접 확인은 소유자가 수행합니다.
 
 ## 1차 기록 (2026-09-17, 보존)
 

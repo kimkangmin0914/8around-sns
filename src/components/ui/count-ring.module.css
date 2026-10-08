@@ -31,7 +31,8 @@
   stroke: var(--tone-gold-deep);
 }
 .ring[data-state="near"] {
-  color: var(--tone-gold-ink);
+  /* Dark gold on light surfaces, light gold on dark ones. */
+  color: color-mix(in srgb, var(--tone-gold-deep) 55%, var(--ink));
 }
 .ring[data-state="over"] .value {
   stroke: var(--danger);
