@@ -9,7 +9,7 @@ const TILES = [
   { tone: "lime", label: "답글" },
   { tone: "orchid", label: "팔로잉" },
   { tone: "crimson", label: "댓글" },
-  { tone: "blue", label: "beside" },
+  { tone: "blue", label: "팔로워" },
 ] as const;
 
 /** Eight tiles around an empty centre. The centre is you. */

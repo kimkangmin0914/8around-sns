@@ -11,7 +11,7 @@
 .composer {
   display: flex;
   gap: 12px;
-  animation: rise var(--t-med) var(--ease-out);
+  animation: global(rise) var(--t-med) var(--ease-out);
 }
 .composer[data-reply] {
   padding: 10px 0 14px;
@@ -66,10 +66,31 @@
   color: var(--danger);
   font-size: var(--text-s);
   font-weight: 560;
-  animation: rise var(--t-med) var(--ease-out);
+  animation: global(rise) var(--t-med) var(--ease-out);
 }
 .composerError svg {
   margin-top: 2px;
+}
+.composerRetry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 0 6px;
+  border-radius: 6px;
+  color: var(--accent-text);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.composerNotice {
+  display: none;
+  margin-top: 6px;
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 560;
+}
+.composer:focus-within .composerNotice {
+  display: block;
 }
 .composerBar {
   display: flex;
@@ -128,8 +149,25 @@
   margin: 0 -10px;
   border-radius: var(--r-m);
 }
+.authorTag {
+  align-self: center;
+  padding: 1px 7px;
+  border-radius: 6px 6px 6px 2px;
+  background: var(--accent-wash);
+  color: var(--accent-text);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1.5;
+}
+.comment:focus {
+  outline: none;
+}
+.comment:focus-visible {
+  background: var(--accent-wash);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
 .comment[data-fresh] {
-  animation: flash 2.6s var(--ease-std) 200ms;
+  animation: global(flash) 2.6s var(--ease-std) 200ms;
 }
 .comment[data-depth="1"] {
   padding-top: 10px;

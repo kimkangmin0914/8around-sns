@@ -11,6 +11,7 @@ import {
 import {
   databaseFailure,
   ok,
+  readFailure,
   uncertainWrite,
   type ActionResult,
   type Failure,
@@ -20,7 +21,7 @@ function authFailure(error: { code?: string; status?: number }): Failure {
   if (error.status === 429)
     return {
       status: "error",
-      message: "요청이 너무 많아요. 잠시 기다린 뒤 다시 시도해 주세요.",
+      message: "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.",
     };
   if (error.code === "invalid_credentials")
     return {
@@ -42,7 +43,7 @@ function authFailure(error: { code?: string; status?: number }): Failure {
   if (error.code === "weak_password")
     return {
       status: "input",
-      message: "조금 더 긴 비밀번호를 사용해 주세요.",
+      message: "더 길거나 복잡한 비밀번호를 정해 주세요.",
       field: "password",
     };
   if (error.code === "signup_disabled")
@@ -50,9 +51,24 @@ function authFailure(error: { code?: string; status?: number }): Failure {
       status: "error",
       message: "지금은 새로 가입할 수 없어요. 잠시 후 다시 시도해 주세요.",
     };
+  if (
+    error.code === "email_address_invalid" ||
+    error.code === "validation_failed"
+  )
+    return {
+      status: "input",
+      message: "이메일 형식을 확인해 주세요.",
+      field: "email",
+    };
+  // Any other 4xx is a definite refusal, not an unknown outcome.
+  if (error.status && error.status >= 400 && error.status < 500)
+    return {
+      status: "error",
+      message: "요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.",
+    };
   return {
     status: "uncertain",
-    message: "결과를 확인하지 못했어요. 잠시 후 로그인 화면에서 확인해 주세요.",
+    message: "결과를 확인하지 못했어요. 잠시 후 로그인해 보세요.",
   };
 }
 
@@ -74,10 +90,10 @@ async function authenticate(
       return {
         status: "error",
         message:
-          "가입은 됐지만 로그인 상태를 확인하지 못했어요. 같은 정보로 로그인해 주세요.",
+          "로그인 상태를 확인하지 못했어요. 같은 정보로 다시 로그인해 주세요.",
       };
     revalidatePath("/", "layout");
-    return ok(signup ? "계정을 만들었어요." : "다시 만나서 반가워요.", null);
+    return ok(signup ? "계정을 만들었어요." : "로그인했어요.", null);
   } catch {
     return authFailure({});
   }
@@ -95,11 +111,15 @@ export async function signOut(): Promise<ActionResult> {
   try {
     const client = await createClient();
     const { error } = await client.auth.signOut({ scope: "local" });
-    if (error)
-      return {
-        status: "error",
-        message: "로그아웃하지 못했어요. 다시 시도해 주세요.",
-      };
+    if (error) {
+      // auth-js clears the local session even when the server call fails.
+      const { data, error: sessionError } = await client.auth.getSession();
+      if (sessionError || data.session)
+        return {
+          status: "error",
+          message: "로그아웃하지 못했어요. 다시 시도해 주세요.",
+        };
+    }
     revalidatePath("/", "layout");
     return ok("로그아웃했어요.", null);
   } catch {
@@ -125,12 +145,16 @@ export async function checkUsername(
       .select("id")
       .eq("username", raw.trim())
       .maybeSingle();
-    if (error) return { available: null, message: "확인하지 못했어요." };
+    if (error)
+      return {
+        available: null,
+        message: "사용할 수 있는지 확인하지 못했어요.",
+      };
     return data
-      ? { available: false, message: "이미 누군가 쓰고 있어요." }
-      : { available: true, message: "쓸 수 있는 이름이에요." };
+      ? { available: false, message: "이미 사용 중인 사용자 이름이에요." }
+      : { available: true, message: "사용할 수 있어요." };
   } catch {
-    return { available: null, message: "확인하지 못했어요." };
+    return { available: null, message: "사용할 수 있는지 확인하지 못했어요." };
   }
 }
 
@@ -160,20 +184,27 @@ export async function completeProfile(
       .select("id,username")
       .eq("id", data.user.id)
       .maybeSingle();
-    if (readError) return databaseFailure(readError.code);
+    if (readError) return readFailure;
     if (existing)
-      return ok("프로필이 이미 준비되어 있어요.", {
-        username: existing.username,
-      });
+      return ok("이미 프로필이 있어요.", { username: existing.username });
     const { data: saved, error: insertError } = await client
       .from("profiles")
       .insert(values.value)
       .select("id,username")
       .single();
+    if (insertError?.code === "23505") {
+      // A second tab may have created this account's profile a moment ago.
+      const { data: mine } = await client
+        .from("profiles")
+        .select("id,username")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      if (mine) return ok("이미 프로필이 있어요.", { username: mine.username });
+    }
     if (insertError) return databaseFailure(insertError.code);
     if (!saved || saved.id !== data.user.id) return uncertainWrite;
     revalidatePath("/", "layout");
-    return ok("beside에 온 걸 환영해요.", { username: saved.username });
+    return ok("프로필을 만들었어요.", { username: saved.username });
   } catch {
     return uncertainWrite;
   }

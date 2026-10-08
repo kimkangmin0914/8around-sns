@@ -10,6 +10,7 @@ import {
 import {
   databaseFailure,
   ok,
+  readFailure,
   uncertainWrite,
   type ActionResult,
 } from "@/lib/action-result";
@@ -20,7 +21,9 @@ import type { Page } from "@/server/queries/posts";
 export async function createComment(
   expectedUserId: string,
   form: FormData,
-): Promise<ActionResult<{ id: string; parentId: string | null }>> {
+): Promise<
+  ActionResult<{ id: string; parentId: string | null; createdAt: string }>
+> {
   try {
     const fields = readFields(form, ["post_id", "parent_id", "content"]);
     if (!fields.ok) return { status: "input", message: fields.message };
@@ -38,11 +41,11 @@ export async function createComment(
       .select("id,author:profiles!posts_author_id_fkey(username)")
       .eq("id", post_id)
       .maybeSingle();
-    if (postError) return databaseFailure(postError.code);
+    if (postError) return readFailure;
     if (!post)
       return {
         status: "input",
-        message: "글을 찾을 수 없어요. 지워졌을 수 있어요.",
+        message: "글을 찾을 수 없어요.",
       };
     if (parent_id) {
       const { data: parent, error: parentError } = await client
@@ -50,19 +53,19 @@ export async function createComment(
         .select("id,post_id,parent_id")
         .eq("id", parent_id)
         .maybeSingle();
-      if (parentError) return databaseFailure(parentError.code);
+      if (parentError) return readFailure;
       // Replies attach to the top-level comment; the UI mentions the person.
       if (!parent || parent.post_id !== post_id || parent.parent_id !== null)
         return {
           status: "input",
-          message: "이 대화에는 답글을 달 수 없어요. 새로고침해 주세요.",
+          message: "답글을 달 댓글을 찾지 못했어요. 새로고침해 주세요.",
         };
     }
     // The database independently enforces ownership, same-post parents and depth.
     const { data: saved, error: insertError } = await client
       .from("comments")
       .insert(checked.value)
-      .select("id,author_id,post_id,parent_id")
+      .select("id,author_id,post_id,parent_id,created_at")
       .single();
     if (insertError) return databaseFailure(insertError.code);
     if (
@@ -78,6 +81,7 @@ export async function createComment(
     return ok(parent_id ? "답글을 남겼어요." : "댓글을 남겼어요.", {
       id: saved.id,
       parentId: saved.parent_id,
+      createdAt: saved.created_at,
     });
   } catch {
     return uncertainWrite;

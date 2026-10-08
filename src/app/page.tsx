@@ -52,11 +52,11 @@ async function Feed({
         <section className="section" data-tight>
           <span className="section-eyebrow eyebrow">피드</span>
           <h1 className="page-title">
-            {welcome ? `${firstName}님, 반가워요` : "오늘의 B면"}
+            {welcome ? `${firstName}님, 반가워요` : "최근 글"}
           </h1>
           {welcome && (
             <p className="page-lede">
-              첫 글은 짧아도 좋아요. 곁에 둘 사람을 먼저 찾아봐도 괜찮고요.
+              첫 글을 쓰거나 팔로우할 사람을 찾아보세요.
             </p>
           )}
           <div style={{ marginTop: 24 }}>
@@ -89,30 +89,27 @@ async function Feed({
                 <EmptyState
                   tone="zen"
                   icon="people"
-                  title="아직 곁에 둔 사람이 없어요"
+                  title="아직 팔로우한 사람이 없어요"
                   actions={
                     <ButtonLink href="/people">
                       <Icon name="follow" size={18} /> 사람들 둘러보기
                     </ButtonLink>
                   }
                 >
-                  팔로우한 사람과 내 글이 여기 모여요. 마음 가는 사람부터 찾아
-                  보세요.
+                  팔로우한 사람의 글과 내 글이 여기에 모여요.
                 </EmptyState>
               ) : (
                 <EmptyState
                   tone={toneFor(viewer.id)}
                   icon="compose"
-                  title="아직 첫 글이 없어요"
-                >
-                  위 입력칸에 지금 떠오른 한 줄을 적어 보세요.
-                </EmptyState>
+                  title="아직 글이 없어요"
+                />
               )
             }
           />
         )}
       </div>
-      <aside className="page-aside" aria-label="내 정보와 추천">
+      <aside className="page-aside" aria-label="내 정보와 새로 온 사람">
         <FeedAside viewer={viewer} />
       </aside>
     </div>
@@ -132,17 +129,14 @@ async function Landing({ serviceError }: { serviceError: boolean }) {
         <section className="section" data-tight>
           <span className="section-eyebrow eyebrow">둘러보기</span>
           <div className={landing.liveHead}>
-            <div>
-              <p className={landing.live}>실시간</p>
-              <h2 className={landing.liveTitle}>방금 올라온 글</h2>
-            </div>
+            <h2 className={landing.liveTitle}>최근 글</h2>
             <Link href="/people" className="link">
               사람들 보기
             </Link>
           </div>
           {serviceError && (
             <p className="muted" style={{ marginTop: 12 }}>
-              로그인 상태를 확인하지 못했어요. 새로고침하면 대부분 해결돼요.
+              로그인 상태를 확인하지 못했어요. 새로고침해 주세요.
             </p>
           )}
         </section>
@@ -159,25 +153,22 @@ async function Landing({ serviceError }: { serviceError: boolean }) {
             initial={feed.items}
             next={feed.next}
             scope="all"
-            endText="가장 첫 글까지 왔어요."
             empty={
               <EmptyState
                 tone="gold"
                 icon="sparkle"
-                title="아직 아무도 쓰지 않았어요"
-                actions={<ButtonLink href="/signup">첫 글 쓰기</ButtonLink>}
-              >
-                첫 B면의 주인이 되어 주세요.
-              </EmptyState>
+                title="아직 글이 없어요"
+                actions={
+                  <ButtonLink href="/signup">가입하고 첫 글 쓰기</ButtonLink>
+                }
+              />
             }
           />
         )}
         <div className={landing.joinBand} data-tone="blue">
           <div>
-            <p className={landing.joinTitle}>읽기만 하긴 아깝잖아요</p>
-            <p className={landing.joinText}>
-              가입하면 바로 쓰고, 답할 수 있어요.
-            </p>
+            <p className={landing.joinTitle}>직접 쓰고 답해 보세요</p>
+            <p className={landing.joinText}>이메일과 비밀번호만 있으면 돼요.</p>
           </div>
           <ButtonLink href="/signup" variant="tone">
             가입하기 <Icon name="arrowRight" size={18} />

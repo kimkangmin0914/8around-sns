@@ -12,6 +12,7 @@ import { MobileBars, Rail } from "@/components/shell/rail";
 import { BentoMenu } from "@/components/shell/bento-menu";
 import { ComposeDialog } from "@/components/shell/compose-dialog";
 import { SessionBoundary } from "@/components/shell/session-boundary";
+import { Shortcuts } from "@/components/shell/shortcuts";
 import { ToastProvider } from "@/components/ui/toast";
 
 const archivo = Archivo({
@@ -25,13 +26,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.URL ?? "https://frolicking-muffin-3c6498.netlify.app",
   ),
-  title: { default: "beside — 곁에 두는 B면", template: "%s · beside" },
+  title: { default: "beside — 짧은 글, 긴 대화", template: "%s · beside" },
   description:
-    "보여주기 위한 앞면 말고, 곁에 둔 사람과 나누는 B면. beside는 짧은 글과 댓글·답글로 이어지는 텍스트 SNS예요.",
+    "짧은 글을 쓰고 댓글과 답글로 대화하는 텍스트 SNS예요. 좋아요도 알고리즘도 없이 쓴 순서대로 보여요.",
   applicationName: "beside",
   openGraph: {
-    title: "beside",
-    description: "Your B-side, beside you. 곁에 두는 B면.",
+    title: "beside — 짧은 글, 긴 대화",
+    description:
+      "짧은 글을 쓰고, 댓글과 답글로 대화를 이어 가요. 좋아요도 알고리즘도 없어요.",
     siteName: "beside",
     locale: "ko_KR",
     type: "website",
@@ -99,6 +101,7 @@ export default async function RootLayout({
             </div>
             <BentoMenu />
             <ComposeDialog />
+            <Shortcuts />
           </ShellProvider>
         </ToastProvider>
       </body>

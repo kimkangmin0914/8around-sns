@@ -22,6 +22,12 @@ export const uncertainWrite: Failure = {
   message: "저장됐는지 확인하지 못했어요. 새로고침해서 확인해 주세요.",
 };
 
+/** A read before any write failed: nothing was saved, so it is not "uncertain". */
+export const readFailure: Failure = {
+  status: "error",
+  message: "지금은 확인할 수 없어요. 잠시 후 다시 시도해 주세요.",
+};
+
 export function databaseFailure(code?: string): Failure {
   if (code === "23505")
     return {
@@ -34,7 +40,7 @@ export function databaseFailure(code?: string): Failure {
   if (["42501", "23503"].includes(code ?? ""))
     return {
       status: "error",
-      message: "저장할 권한이 없어요. 다시 로그인한 뒤 시도해 주세요.",
+      message: "권한이 없어요. 다시 로그인해 주세요.",
     };
   if (["42P01", "PGRST205", "PGRST204"].includes(code ?? ""))
     return {

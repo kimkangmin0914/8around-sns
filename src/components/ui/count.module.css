@@ -1,0 +1,26 @@
+.count {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.digits {
+  display: inline-block;
+}
+.digits[data-roll="up"] {
+  animation: roll-up 420ms var(--ease-spring) both;
+}
+.digits[data-roll="down"] {
+  animation: roll-down 420ms var(--ease-spring) both;
+}
+@keyframes roll-up {
+  from {
+    opacity: 0;
+    transform: perspective(120px) translateY(70%) rotateX(-70deg);
+  }
+}
+@keyframes roll-down {
+  from {
+    opacity: 0;
+    transform: perspective(120px) translateY(-70%) rotateX(70deg);
+  }
+}

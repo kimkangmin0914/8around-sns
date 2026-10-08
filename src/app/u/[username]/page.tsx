@@ -5,11 +5,14 @@ import { getViewer } from "@/server/queries/viewer";
 import { getProfile, listConnections } from "@/server/queries/people";
 import { listPosts } from "@/server/queries/posts";
 import { USERNAME_PATTERN, parseTab } from "@/lib/validation";
-import { initialOf, toneFor } from "@/lib/tone";
+import { toneFor } from "@/lib/tone";
 import { joinedMonth } from "@/lib/time";
 import { FeedList } from "@/components/feed/feed-list";
 import { PeopleList } from "@/components/people/people-list";
 import { FollowButton } from "@/components/people/follow-button";
+import { SeatMark } from "@/components/people/seat-mark";
+import { Tilt } from "@/components/ui/tilt";
+import { Count } from "@/components/ui/count";
 import { ComposeButton } from "@/components/shell/compose-button";
 import { SiteFoot } from "@/components/feed/aside";
 import { EmptyState, ErrorState } from "@/components/ui/empty-state";
@@ -33,7 +36,8 @@ export async function generateMetadata({
   if (!result.ok || !result.profile) return { title: "프로필" };
   return {
     title: `${result.profile.display_name} (@${username})`,
-    description: result.profile.bio || `${result.profile.display_name}님의 B면`,
+    description:
+      result.profile.bio || `${result.profile.display_name}님이 beside에 쓴 글`,
   };
 }
 
@@ -104,50 +108,63 @@ export default async function ProfilePage({
       <div className="page-main">
         <section className="section" data-tight>
           <span className="section-eyebrow eyebrow">프로필</span>
-          <div className={styles.hero} data-tone={toneFor(profile.id)}>
-            <div className={styles.badges}>
-              {self && <span className={styles.badge}>내 프로필</span>}
-              {relation?.followsYou && !self && (
+          <Tilt
+            className={styles.hero}
+            data-tone={toneFor(profile.id)}
+            data-seat-scope=""
+          >
+            {relation?.followsYou && !self && (
+              <p className={styles.badges}>
                 <span className={styles.badge}>
                   <Icon name="following" size={14} strokeWidth={2.2} />
-                  나를 팔로우해요
+                  {relation.following ? "서로 팔로우" : "나를 팔로우"}
                 </span>
-              )}
-            </div>
-            <h1 className={styles.name}>{profile.display_name}</h1>
-            <p className={styles.handle}>@{profile.username}</p>
-            {profile.bio ? (
-              <p className={styles.bio}>{profile.bio}</p>
-            ) : (
-              <p className={styles.bio} data-empty>
-                {self ? "아직 소개가 없어요." : "소개가 아직 없어요."}
               </p>
             )}
-            <p className={styles.joined}>
-              <Icon name="calendar" size={15} />
-              {joinedMonth(profile.created_at)} 합류
-            </p>
-            <div className={styles.actions}>
-              {self ? (
-                <ComposeButton variant="tone" size="m" />
-              ) : (
-                <FollowButton
-                  targetId={profile.id}
-                  targetName={profile.display_name}
-                  following={relation?.following ?? false}
-                  followsYou={relation?.followsYou ?? false}
-                  variant="onTone"
-                />
-              )}
+            <div className={styles.copy}>
+              <h1 className={styles.name}>{profile.display_name}</h1>
+              <p className={styles.handle}>@{profile.username}</p>
+              {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
+              <p className={styles.joined}>
+                <Icon name="calendar" size={15} />
+                {joinedMonth(profile.created_at)} 가입
+              </p>
+              <div className={styles.actions}>
+                {self ? (
+                  <ComposeButton variant="tone" size="m" />
+                ) : (
+                  <FollowButton
+                    targetId={profile.id}
+                    targetName={profile.display_name}
+                    following={relation?.following ?? false}
+                    followsYou={relation?.followsYou ?? false}
+                    variant="onTone"
+                  />
+                )}
+              </div>
             </div>
-            <span className={styles.initial} aria-hidden="true">
-              {initialOf(profile.display_name)}
-            </span>
-          </div>
+            <SeatMark
+              className={styles.mark}
+              id={profile.id}
+              posts={profile.counts.posts}
+              seat={self ? "self" : relation?.following ? "taken" : "open"}
+              viewerTone={viewerId ? toneFor(viewerId) : null}
+              invite={
+                viewer.status === "ready"
+                  ? {
+                      name: viewer.profile.display_name,
+                      tone: toneFor(viewer.id),
+                    }
+                  : null
+              }
+              size="var(--mark)"
+              hero
+            />
+          </Tilt>
         </section>
         <nav
           className={styles.tabs}
-          aria-label={`${profile.display_name}님의 목록`}
+          aria-label={`${profile.display_name}님의 글과 팔로우 목록`}
         >
           {tabs.map((item) => (
             <Link
@@ -157,7 +174,7 @@ export default async function ProfilePage({
               aria-current={activeTab === item.key ? "page" : undefined}
               scroll={false}
             >
-              <span className={`num ${styles.tabCount}`}>{item.count}</span>
+              <Count value={item.count} className={`num ${styles.tabCount}`} />
               <span className={styles.tabLabel}>{item.label}</span>
             </Link>
           ))}
@@ -180,7 +197,7 @@ export default async function ProfilePage({
               next={posts.next}
               scope="author"
               authorId={profile.id}
-              endText={`${profile.display_name}님의 첫 글까지 왔어요.`}
+              endText={`${profile.display_name}님의 글을 모두 봤어요.`}
               empty={
                 <EmptyState
                   tone={toneFor(profile.id)}
@@ -189,11 +206,7 @@ export default async function ProfilePage({
                   actions={
                     self ? <ComposeButton>첫 글 쓰기</ComposeButton> : null
                   }
-                >
-                  {self
-                    ? "첫 글은 짧아도 좋아요. 지금 떠오르는 한 줄이면 충분해요."
-                    : `${profile.display_name}님이 글을 쓰면 여기에 보여요.`}
-                </EmptyState>
+                />
               }
             />
           ))}
@@ -240,21 +253,13 @@ export default async function ProfilePage({
                       </ButtonLink>
                     ) : null
                   }
-                >
-                  {activeTab === "followers"
-                    ? self
-                      ? "글을 쓰고 대화에 참여하면 곁에 두려는 사람이 생겨요."
-                      : `${profile.display_name}님을 처음으로 팔로우해 보세요.`
-                    : self
-                      ? "마음이 가는 사람을 팔로우하면 여기에 모여요."
-                      : `${profile.display_name}님은 아직 아무도 팔로우하지 않았어요.`}
-                </EmptyState>
+                />
               }
             />
           ))}
       </div>
       <aside className="page-aside" aria-label="사이트 정보">
-        <SiteFoot shortcut={viewer.status === "ready"} />
+        <SiteFoot />
       </aside>
     </div>
   );

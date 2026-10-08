@@ -8,7 +8,9 @@ import { Mark } from "@/components/brand/mark";
 import { useShell } from "@/components/shell/shell-context";
 import { useToast } from "@/components/ui/toast";
 import { signOut } from "@/server/actions/auth";
-import { initialOf } from "@/lib/tone";
+import { SeatMark } from "@/components/people/seat-mark";
+import { closesOnBackdrop, restoreFocus } from "@/components/shell/dialog";
+import { useShortcutsEnabled } from "@/components/shell/shortcuts";
 import styles from "./bento-menu.module.css";
 
 const REPO = "https://github.com/kimkangmin0914/8around-sns";
@@ -16,7 +18,7 @@ const REPO = "https://github.com/kimkangmin0914/8around-sns";
 type Tile = {
   slot: "a" | "b" | "c" | "d" | "e" | "f" | "g";
   label: string;
-  note: string;
+  note?: string;
   art: ReactNode;
 } & (
   | { href: string; external?: boolean }
@@ -70,6 +72,7 @@ function BigIcon({ name }: { name: IconName }) {
 
 export function BentoMenu() {
   const { viewer, menuOpen, closeMenu, openCompose } = useShell();
+  const keys = useShortcutsEnabled();
   const dialog = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
   const router = useRouter();
@@ -81,12 +84,15 @@ export function BentoMenu() {
     if (menuOpen && !node.open) {
       setClosing(false);
       node.showModal();
+      // autoFocus fires before showModal(); focus the close button now.
+      node.querySelector<HTMLElement>("[data-menu-close]")?.focus();
     }
     if (!menuOpen && node.open) {
       setClosing(true);
       const timer = window.setTimeout(() => {
         node.close();
         setClosing(false);
+        restoreFocus();
       }, 200);
       return () => window.clearTimeout(timer);
     }
@@ -99,7 +105,6 @@ export function BentoMenu() {
     {
       slot: "a",
       label: "피드",
-      note: "오늘의 B면",
       href: "/",
       art: <NodeArt />,
     },
@@ -107,21 +112,19 @@ export function BentoMenu() {
       ? {
           slot: "b",
           label: "글쓰기",
-          note: "지금 떠오른 한 줄",
+          note: keys ? "단축키 N" : undefined,
           art: <QuoteArt />,
           onSelect: openCompose,
         }
       : {
           slot: "b",
           label: "회원가입",
-          note: "1분이면 충분해요",
           art: <QuoteArt />,
           href: viewer.status === "onboarding" ? "/onboarding" : "/signup",
         },
     {
       slot: "c",
       label: "사람들",
-      note: "곁에 둘 사람",
       href: "/people",
       art: (
         <span className={styles.markArt} aria-hidden="true">
@@ -132,19 +135,25 @@ export function BentoMenu() {
     {
       slot: "d",
       label: ready ? "내 프로필" : "로그인",
-      note: ready ? `@${viewer.username}` : "다시 만나요",
+      note: ready ? `@${viewer.username}` : undefined,
       href: me ?? "/login",
-      art: (
-        <span className={styles.initial} aria-hidden="true">
-          {ready ? initialOf(viewer.displayName) : "Hi"}
+      art: ready ? (
+        <span className={styles.seat} aria-hidden="true">
+          <SeatMark
+            id={viewer.id}
+            posts={0}
+            seat="self"
+            size="clamp(84px, 6vw + 40px, 132px)"
+          />
         </span>
+      ) : (
+        <BigIcon name="login" />
       ),
     },
     ready
       ? {
           slot: "e",
           label: "팔로워",
-          note: "나를 곁에 둔 사람",
           href: `${me}?tab=followers`,
           art: <BigIcon name="people" />,
         }
@@ -160,14 +169,12 @@ export function BentoMenu() {
       ? {
           slot: "f",
           label: "팔로잉",
-          note: "내가 곁에 둔 사람",
           href: `${me}?tab=following`,
           art: <CurveArt />,
         }
       : {
           slot: "f",
-          label: "beside란?",
-          note: "글 · 댓글 · 팔로우",
+          label: "소개",
           href: "/#about",
           art: <CurveArt />,
         },
@@ -175,7 +182,6 @@ export function BentoMenu() {
       ? {
           slot: "g",
           label: "로그아웃",
-          note: "다음에 또 만나요",
           art: <BigIcon name="logout" />,
           onSelect: async () => {
             const result = await signOut().catch(() => null);
@@ -196,7 +202,6 @@ export function BentoMenu() {
       : {
           slot: "g",
           label: "디자인 노트",
-          note: "beside를 이루는 규칙",
           href: "/brand",
           art: <BigIcon name="grid" />,
         },
@@ -212,9 +217,7 @@ export function BentoMenu() {
         event.preventDefault();
         closeMenu();
       }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) closeMenu();
-      }}
+      {...closesOnBackdrop(closeMenu)}
     >
       {menuOpen || closing ? (
         <nav className={styles.grid} aria-label="전체 메뉴">
@@ -222,7 +225,7 @@ export function BentoMenu() {
             const body = (
               <>
                 <span className={styles.label}>{tile.label}</span>
-                <span className={styles.note}>{tile.note}</span>
+                {tile.note && <span className={styles.note}>{tile.note}</span>}
                 {tile.art}
               </>
             );
@@ -269,7 +272,7 @@ export function BentoMenu() {
             className={styles.close}
             onClick={closeMenu}
             aria-label="메뉴 닫기"
-            autoFocus
+            data-menu-close=""
           >
             <Icon name="close" size={28} strokeWidth={1.7} />
           </button>

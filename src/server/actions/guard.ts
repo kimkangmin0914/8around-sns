@@ -21,7 +21,7 @@ export async function requireAuthor(
       ok: false,
       failure: {
         status: "error",
-        message: `${verb} 로그인이 필요해요. 다시 로그인해 주세요.`,
+        message: `${verb} 다시 로그인해 주세요.`,
       },
     };
   if (data.user.id !== expectedUserId)

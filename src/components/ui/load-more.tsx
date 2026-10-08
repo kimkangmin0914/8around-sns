@@ -51,7 +51,7 @@ export function LoadMore({
           variant="secondary"
           onClick={onLoad}
           busy={state === "loading"}
-          busyLabel="더 불러오는 중"
+          busyLabel="불러오는 중"
         >
           {label}
           <Icon name="chevronDown" size={18} />

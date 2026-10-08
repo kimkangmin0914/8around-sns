@@ -24,24 +24,23 @@
   font-weight: 600;
   opacity: 0.85;
 }
-.meInitial {
+.meName,
+.meHandle {
+  max-width: calc(100% - 100px);
+}
+.meMark {
   position: absolute;
-  right: 14px;
-  bottom: -6px;
-  font-family: var(--font-wide);
-  font-variation-settings: "wdth" 112;
-  font-size: 6.5rem;
-  font-weight: 800;
-  line-height: 0.8;
-  letter-spacing: -0.06em;
-  transition: transform 450ms var(--ease-spring);
+  top: 50%;
+  right: 18px;
+  margin-top: -44px;
 }
 @media (hover: hover) {
   .me:hover {
     background: var(--tone-deep);
   }
-  .me:hover .meInitial {
-    transform: translate(-4px, -6px) rotate(-4deg);
+  .me:hover {
+    --seat-rx: 22deg;
+    --seat-ry: -26deg;
   }
 }
 
@@ -107,6 +106,19 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-self: start;
+  margin-left: -6px;
+  padding: 4px 6px;
+  border-radius: var(--r-s);
+  color: var(--ink-2);
+  font-size: var(--text-s);
+  font-weight: 600;
+  transition: background-color var(--t-fast) var(--ease-std);
+}
+@media (hover: hover) {
+  .shortcut:hover {
+    background: var(--surface-hover);
+  }
 }
 .shortcut kbd {
   display: inline-grid;

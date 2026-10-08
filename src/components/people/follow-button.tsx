@@ -48,8 +48,15 @@ export function FollowButton({
       <Button
         size={size}
         variant={variant === "onTone" ? "tone" : "primary"}
+        aria-label={`${targetName}님 팔로우`}
         onClick={() =>
-          router.push(viewer.status === "onboarding" ? "/onboarding" : "/login")
+          router.push(
+            viewer.status === "onboarding"
+              ? "/onboarding"
+              : `/login?next=${encodeURIComponent(
+                  window.location.pathname + window.location.search,
+                )}`,
+          )
         }
       >
         <Icon name="follow" size={18} />
@@ -91,9 +98,9 @@ export function FollowButton({
     }
   }
 
-  const label = state
-    ? `${targetName}님 팔로우 그만두기`
-    : followsYou
+  // A toggle keeps one name; aria-pressed says whether it is on.
+  const label =
+    followsYou && !state
       ? `${targetName}님 맞팔로우`
       : `${targetName}님 팔로우`;
 
@@ -118,11 +125,11 @@ export function FollowButton({
             </span>
             <span className={styles.off}>
               <Icon name="unfollow" size={18} />
-              언팔로우
+              팔로우 취소
             </span>
           </>
         ) : (
-          <span className={styles.idle}>
+          <span>
             <Icon name="follow" size={18} />
             {followsYou ? "맞팔로우" : "팔로우"}
           </span>

@@ -1,9 +1,10 @@
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/icons/icon";
+import { Tilt } from "@/components/ui/tilt";
 import styles from "./landing.module.css";
 
-const LINE_ONE = ["앞면", "말고,"];
-const LINE_TWO = ["B면을", "들려줘요"];
+const LINE_ONE = ["짧은", "글,"];
+const LINE_TWO = ["긴", "대화"];
 
 function Cursor({
   name,
@@ -51,24 +52,22 @@ export function Hero() {
     );
   };
   return (
-    <section className={styles.hero} aria-labelledby="hero-title">
+    <Tilt as="section" className={styles.hero} aria-labelledby="hero-title">
       <span className={styles.peek} data-tone="sunset" data-pos="left" />
       <span className={styles.peek} data-tone="zen" data-pos="right" />
       <span className={styles.peek} data-tone="gold" data-pos="bottom" />
       <div className={styles.heroInner}>
-        <p className="eyebrow">beside · 텍스트로 나누는 B면</p>
+        <p className="eyebrow">beside</p>
         <h1 id="hero-title" className={styles.heroTitle}>
           <span className={styles.line}>
             {LINE_ONE.map((text) => word(text))}
           </span>
           <span className={styles.line}>
-            {LINE_TWO.map((text) => word(text, text === "B면을"))}
+            {LINE_TWO.map((text) => word(text, text === "대화"))}
           </span>
         </h1>
         <p className={styles.heroLede}>
-          잘 보이려고 다듬은 앞면 대신, 곁에 둔 사람들과 꾸밈없는 한 줄을
-          나눠요. 좋아요 수도, 피드를 섞는 알고리즘도 없어요. 시간순으로 흐르는
-          글과 대화뿐이에요.
+          좋아요도 알고리즘도 없이, 쓴 순서대로 보여요.
         </p>
         <div className={styles.heroActions}>
           <ButtonLink href="/signup" size="l">
@@ -83,32 +82,32 @@ export function Hero() {
         <Cursor name="도윤" tone="navy" className={styles.c2} />
         <Cursor name="서연" tone="lime" className={styles.c3} />
       </div>
-    </section>
+    </Tilt>
   );
 }
 
 /** Scroll-driven statement: words fill in as they pass through the viewport. */
 export function Statement() {
   const parts: (string | { tone: string })[] = [
-    "한",
-    "줄을",
-    "쓰면",
-    { tone: "gold" },
+    "글에",
     "댓글이",
-    "붙고,",
-    "댓글은",
-    { tone: "zen" },
-    "답글로",
+    "달리고,",
+    { tone: "gold" },
+    "댓글에",
+    "답글이",
     "이어지고,",
+    { tone: "zen" },
     "마음이",
     "맞으면",
     { tone: "orchid" },
-    "서로의",
-    "곁이",
-    "돼요.",
+    "서로",
+    "팔로우해요.",
   ];
   return (
-    <section className={styles.statement} aria-label="beside가 움직이는 방식">
+    <section
+      className={styles.statement}
+      aria-label="글과 댓글, 답글이 이어지는 방식"
+    >
       <p className={styles.statementText}>
         {parts.map((part, i) =>
           typeof part === "string" ? (

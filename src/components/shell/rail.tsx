@@ -2,11 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { MouseEvent } from "react";
 import { Icon } from "@/components/icons/icon";
 import { Mark, Wordmark } from "@/components/brand/mark";
 import { AccountMenu } from "@/components/shell/account-menu";
 import { useShell } from "@/components/shell/shell-context";
 import { navItems, sectionLabel } from "@/components/shell/routes";
+
+/** Tapping the tab you're already on returns to the top, like native apps. */
+function toTopIfCurrent(event: MouseEvent<HTMLAnchorElement>) {
+  const here = window.location.pathname + window.location.search;
+  if (here !== event.currentTarget.getAttribute("href")) return;
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0)
+    return;
+  event.preventDefault();
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+}
 import styles from "./shell.module.css";
 
 /** Desktop & tablet: a fixed rail on the left edge of the grid. */
@@ -31,11 +43,12 @@ export function Rail() {
               href={item.href}
               className={styles.railItem}
               aria-current={active ? "page" : undefined}
+              onClick={toTopIfCurrent}
             >
               <span className={styles.railIcon}>
                 <Icon name={item.icon} size={22} />
               </span>
-              <span className={styles.railText}>{item.label}</span>
+              <span>{item.label}</span>
             </Link>
           );
         })}
@@ -49,7 +62,7 @@ export function Rail() {
             <span className={`${styles.railIcon} ${styles.railCompose}`}>
               <Icon name="compose" size={22} />
             </span>
-            <span className={styles.railText}>글쓰기</span>
+            <span>글쓰기</span>
           </button>
         )}
       </nav>
@@ -81,6 +94,7 @@ export function MobileBars() {
       href={item.href}
       className={styles.tab}
       aria-current={item.match(pathname) ? "page" : undefined}
+      onClick={toTopIfCurrent}
     >
       <Icon name={item.icon} size={22} />
       <span>{item.label}</span>

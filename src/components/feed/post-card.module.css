@@ -4,7 +4,7 @@
   gap: 16px;
   padding: 24px var(--gutter) 18px;
   transition: background-color var(--t-med) var(--ease-std);
-  animation: rise var(--t-slow) var(--ease-out) both;
+  animation: global(rise) var(--t-slow) var(--ease-out) both;
   animation-delay: calc(var(--i, 0) * 40ms);
 }
 .post::before {
@@ -19,8 +19,8 @@
 }
 .post[data-fresh] {
   animation:
-    drop-in 700ms var(--ease-spring) both,
-    flash 2.6s var(--ease-std) 300ms;
+    global(drop-in) 700ms var(--ease-spring) both,
+    global(flash) 2.6s var(--ease-std) 300ms;
 }
 @media (hover: hover) {
   .post:hover {
@@ -29,6 +29,15 @@
   .post:hover .avatarLink > span {
     border-radius: 50%;
   }
+}
+
+/* J/K focus: the row lights up like a fresh post, without an outline box. */
+.post:focus {
+  outline: none;
+}
+.post:focus-visible {
+  background: var(--accent-wash);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .cover {

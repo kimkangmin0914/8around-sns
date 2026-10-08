@@ -62,8 +62,9 @@ export function Composer({
     try {
       const saved = sessionStorage.getItem(draftKey(userId, variant));
       // Syncing from browser storage, which the server render cannot see.
+      // Another account's text must never stay on screen: reset when empty.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (saved) setContent(saved);
+      setContent(saved ?? "");
     } catch {
       /* Storage can be unavailable; drafts are a convenience. */
     }
@@ -139,18 +140,19 @@ export function Composer({
         />
         <div className={styles.body}>
           <label htmlFor={id} className="sr-only">
-            {displayName}님의 새 글
+            새 글 내용
           </label>
           <textarea
             ref={area}
             id={id}
             name="content"
             className={styles.input}
-            placeholder="지금 떠오른 한 줄"
+            placeholder="지금 생각을 적어 보세요"
             value={content}
             rows={variant === "dialog" ? 5 : 2}
             autoFocus={autoFocus}
-            disabled={pending}
+            readOnly={pending}
+            aria-busy={pending || undefined}
             aria-invalid={failure?.status === "input" || over || undefined}
             aria-describedby={`${id}-feedback ${id}-count`}
             onChange={(event) => {
@@ -161,7 +163,8 @@ export function Composer({
               if (
                 event.key === "Enter" &&
                 (event.metaKey || event.ctrlKey) &&
-                !event.nativeEvent.isComposing
+                !event.nativeEvent.isComposing &&
+                event.keyCode !== 229
               ) {
                 event.preventDefault();
                 void submit();
@@ -171,12 +174,21 @@ export function Composer({
         </div>
       </div>
       <div id={`${id}-feedback`} aria-live="polite" className={styles.feedback}>
+        {!failure && over && (
+          <p className={styles.error} data-status="input">
+            <Icon name="alert" size={16} strokeWidth={2.1} />
+            <span>
+              {CONTENT_LIMIT}자를 넘었어요. {length - CONTENT_LIMIT}자 줄여
+              주세요.
+            </span>
+          </p>
+        )}
         {failure && (
           <p className={styles.error} data-status={failure.status}>
             <Icon name="alert" size={16} strokeWidth={2.1} />
             <span>
               {failure.status === "uncertain"
-                ? "올라갔는지 확인하지 못했어요. 쓴 내용은 그대로 남겨 두었어요."
+                ? "저장됐는지 확인하지 못했어요. 쓴 내용은 남겨 두었어요."
                 : failure.message}
             </span>
             {failure.status === "uncertain" && (
@@ -185,7 +197,7 @@ export function Composer({
                 className={styles.retry}
                 onClick={() => router.refresh()}
               >
-                <Icon name="refresh" size={14} strokeWidth={2.2} /> 피드 확인
+                <Icon name="refresh" size={14} strokeWidth={2.2} /> 새로고침
               </button>
             )}
           </p>
@@ -211,6 +223,7 @@ export function Composer({
           </Button>
         </div>
       </div>
+      <p className={styles.notice}>올린 글은 고치거나 지울 수 없어요.</p>
     </form>
   );
 }

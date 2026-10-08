@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { closesOnBackdrop, restoreFocus } from "@/components/shell/dialog";
 import { Icon } from "@/components/icons/icon";
 import { useShell } from "@/components/shell/shell-context";
 import { Composer } from "@/components/feed/composer";
 import styles from "./compose-dialog.module.css";
 
-/** Write from anywhere: rail button, mobile "+", the bento tile or the N key. */
+/** Write from anywhere: rail button, mobile "+", the bento tile or the N key (see Shortcuts). */
 export function ComposeDialog() {
-  const { viewer, composeOpen, closeCompose, openCompose } = useShell();
+  const { viewer, composeOpen, closeCompose } = useShell();
   const dialog = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
   const [generation, setGeneration] = useState(0);
@@ -31,30 +32,18 @@ export function ComposeDialog() {
       const timer = window.setTimeout(() => {
         node.close();
         setClosing(false);
+        restoreFocus();
       }, 180);
       return () => window.clearTimeout(timer);
     }
   }, [composeOpen]);
 
-  // "N" opens the composer unless the person is typing or a dialog is open.
-  useEffect(() => {
-    if (viewer.status !== "ready") return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "n" && event.key !== "N") return;
-      if (event.metaKey || event.ctrlKey || event.altKey || event.isComposing)
-        return;
-      const target = event.target as HTMLElement | null;
-      if (
-        target?.closest("input, textarea, select, [contenteditable='true']") ||
-        document.querySelector("dialog[open]")
-      )
-        return;
-      event.preventDefault();
-      openCompose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [viewer.status, openCompose]);
+  // Never close while a post is on its way: its result would have no screen.
+  const sending = (node: HTMLDialogElement) =>
+    Boolean(node.querySelector("form[data-pending]"));
+  const backdrop = closesOnBackdrop((node) => {
+    if (!sending(node)) closeCompose();
+  });
 
   if (viewer.status !== "ready") return null;
 
@@ -66,11 +55,15 @@ export function ComposeDialog() {
       data-closing={closing || undefined}
       onCancel={(event) => {
         event.preventDefault();
+        if (!sending(event.currentTarget)) closeCompose();
+      }}
+      // A repeated Esc can close a modal even when cancel is prevented; keep
+      // state in step so the dialog can open again (the draft stays saved).
+      onClose={() => {
+        setClosing(false);
         closeCompose();
       }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) closeCompose();
-      }}
+      {...backdrop}
     >
       <div className={styles.panel}>
         <header className={styles.head}>
@@ -80,15 +73,18 @@ export function ComposeDialog() {
           <button
             type="button"
             className={styles.close}
-            onClick={closeCompose}
-            aria-label="닫기"
+            onClick={(event) => {
+              const node = event.currentTarget.closest("dialog");
+              if (!node || !sending(node)) closeCompose();
+            }}
+            aria-label="글쓰기 창 닫기"
           >
             <Icon name="close" size={20} />
           </button>
         </header>
         {composeOpen || closing ? (
           <Composer
-            key={generation}
+            key={`${viewer.id}:${generation}`}
             userId={viewer.id}
             displayName={viewer.displayName}
             variant="dialog"

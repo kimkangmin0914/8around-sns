@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { createComment } from "@/server/actions/comments";
 import {
@@ -15,12 +16,21 @@ import { CountRing } from "@/components/ui/count-ring";
 import { Icon } from "@/components/icons/icon";
 import styles from "./thread.module.css";
 
+export type PostedComment = {
+  id: string;
+  parentId: string | null;
+  createdAt: string;
+  content: string;
+};
+
+const BARE_MENTION = /^@[a-z0-9_]{3,20}\s*$/i;
+
 export function CommentComposer({
   userId,
   displayName,
   postId,
   parent,
-  autoFocus = false,
+  focusKey,
   onPosted,
   onCancel,
 }: {
@@ -29,14 +39,27 @@ export function CommentComposer({
   postId: string;
   /** Replying: the top-level comment, plus whom we answer (for the @mention). */
   parent?: { id: string; name: string; username: string | null };
-  autoFocus?: boolean;
-  onPosted: (id: string, parentId: string | null) => void;
+  /** Changes each time the composer should take focus (a new "답글" click). */
+  focusKey?: number;
+  onPosted: (comment: PostedComment) => void;
   onCancel?: () => void;
 }) {
+  const router = useRouter();
   const reply = Boolean(parent);
-  const [content, setContent] = useState(() =>
-    parent?.username ? `@${parent.username} ` : "",
-  );
+  const mentionFor = (username: string | null | undefined) =>
+    username ? `@${username} ` : "";
+  const [content, setContent] = useState(() => mentionFor(parent?.username));
+  // Answering someone else in the same thread swaps the @mention, but never
+  // throws away text the person has already written.
+  const [mention, setMention] = useState(parent?.username ?? null);
+  if ((parent?.username ?? null) !== mention) {
+    setMention(parent?.username ?? null);
+    setContent((current) =>
+      !current.trim() || BARE_MENTION.test(current)
+        ? mentionFor(parent?.username)
+        : current,
+    );
+  }
   const [pending, setPending] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
   const busy = useRef(false);
@@ -45,12 +68,12 @@ export function CommentComposer({
 
   // Put the caret after the prefilled @mention.
   useEffect(() => {
-    if (!autoFocus || !area.current) return;
+    if (focusKey === undefined || !area.current) return;
     const node = area.current;
     node.focus({ preventScroll: true });
     node.setSelectionRange(node.value.length, node.value.length);
     node.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [autoFocus]);
+  }, [focusKey]);
 
   const length = codePointLength(normalizeText(content));
   const onlyMention =
@@ -82,7 +105,12 @@ export function CommentComposer({
       const result = await createComment(userId, form);
       if (result.status === "success") {
         setContent("");
-        onPosted(result.data.id, result.data.parentId);
+        onPosted({
+          id: result.data.id,
+          parentId: result.data.parentId,
+          createdAt: result.data.createdAt ?? new Date().toISOString(),
+          content: checked.value.content,
+        });
       } else setFailure(result);
     } catch {
       setFailure(uncertainWrite);
@@ -104,7 +132,7 @@ export function CommentComposer({
       <Avatar id={userId} name={displayName} size={reply ? 32 : 40} />
       <div className={styles.composerBody}>
         <label htmlFor={id} className="sr-only">
-          {reply ? `${parent?.name}님에게 답글` : "댓글"}
+          {reply ? `${parent?.name}님에게 답글` : "댓글 쓰기"}
         </label>
         {reply && (
           <p className={styles.replyingTo} aria-hidden="true">
@@ -118,8 +146,9 @@ export function CommentComposer({
           className={styles.composerInput}
           value={content}
           rows={2}
-          placeholder={reply ? "답글을 적어 보세요" : "생각을 덧붙여 보세요"}
-          disabled={pending}
+          placeholder={reply ? "답글을 남겨 보세요" : "댓글을 남겨 보세요"}
+          readOnly={pending}
+          aria-busy={pending || undefined}
           aria-invalid={failure?.status === "input" || undefined}
           aria-describedby={`${id}-feedback`}
           onChange={(event) => {
@@ -127,24 +156,43 @@ export function CommentComposer({
             if (failure?.status === "input") setFailure(null);
           }}
           onKeyDown={(event) => {
-            if (event.nativeEvent.isComposing) return;
+            // Safari ends a Hangul syllable with keyCode 229 and isComposing false.
+            if (event.nativeEvent.isComposing || event.keyCode === 229) return;
             if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
               event.preventDefault();
               void submit();
             }
-            if (event.key === "Escape" && onCancel) {
+            if (event.key === "Escape" && onCancel && !pending) {
               event.preventDefault();
               onCancel();
             }
           }}
         />
         <div id={`${id}-feedback`} aria-live="polite">
+          {!failure && length > CONTENT_LIMIT && (
+            <p className={styles.composerError}>
+              <Icon name="alert" size={15} strokeWidth={2.1} />
+              {CONTENT_LIMIT}자를 넘었어요. {length - CONTENT_LIMIT}자 줄여
+              주세요.
+            </p>
+          )}
           {failure && (
             <p className={styles.composerError}>
               <Icon name="alert" size={15} strokeWidth={2.1} />
-              {failure.status === "uncertain"
-                ? "저장됐는지 확인하지 못했어요. 쓴 내용은 남겨 두었어요. 새로고침해서 확인해 주세요."
-                : failure.message}
+              <span>
+                {failure.status === "uncertain"
+                  ? "저장됐는지 확인하지 못했어요. 쓴 내용은 남겨 두었어요."
+                  : failure.message}
+              </span>
+              {failure.status === "uncertain" && (
+                <button
+                  type="button"
+                  className={styles.composerRetry}
+                  onClick={() => router.refresh()}
+                >
+                  <Icon name="refresh" size={14} strokeWidth={2.2} /> 새로고침
+                </button>
+              )}
             </p>
           )}
         </div>
@@ -174,6 +222,9 @@ export function CommentComposer({
             </Button>
           </div>
         </div>
+        <p className={styles.composerNotice}>
+          올린 {reply ? "답글" : "댓글"}은 고치거나 지울 수 없어요.
+        </p>
       </div>
     </form>
   );

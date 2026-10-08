@@ -110,7 +110,7 @@
   border: 2px dashed var(--line-strong);
   border-radius: 6px;
   color: var(--ink-3);
-  animation: fade 600ms var(--ease-std) 700ms both;
+  animation: global(fade) 600ms var(--ease-std) 700ms both;
 }
 .centerYou {
   display: grid;
@@ -146,7 +146,7 @@
 .panelInner {
   width: 100%;
   max-width: 440px;
-  animation: rise 700ms var(--ease-out) 150ms both;
+  animation: global(rise) 700ms var(--ease-out) 150ms both;
 }
 .title {
   margin-top: 12px;
@@ -223,7 +223,7 @@
 .formError[data-status="uncertain"] {
   background: color-mix(in srgb, var(--tone-gold) 28%, var(--surface));
   color: var(--ink);
-  animation: rise var(--t-med) var(--ease-out);
+  animation: global(rise) var(--t-med) var(--ease-out);
 }
 .formError svg {
   margin-top: 2px;

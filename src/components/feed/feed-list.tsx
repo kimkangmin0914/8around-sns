@@ -18,7 +18,7 @@ export function FeedList({
   scope,
   authorId,
   empty,
-  endText = "여기까지 다 읽었어요.",
+  endText = "글을 모두 봤어요.",
 }: {
   initial: FeedPost[];
   next: string | null;
@@ -29,7 +29,9 @@ export function FeedList({
 }) {
   const { fresh } = useShell();
   const [more, setMore] = useState<FeedPost[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
+  // undefined until a page has been loaded; then the server's next cursor.
+  // (An empty page must not fall back to the first cursor and loop.)
+  const [cursor, setCursor] = useState<string | null | undefined>(undefined);
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const previous = useRef(initial);
 
@@ -40,7 +42,7 @@ export function FeedList({
       setMore((list) => mergeNewestFirst(dropped, list));
   }, [initial, more.length]);
 
-  const activeCursor = more.length ? cursor : next;
+  const activeCursor = cursor === undefined ? next : cursor;
   const items = mergeNewestFirst(initial, more);
 
   async function load() {
@@ -71,7 +73,7 @@ export function FeedList({
         ))}
       </div>
       {activeCursor ? (
-        <LoadMore state={state} onLoad={load} label="이전 글 더 보기" />
+        <LoadMore state={state} onLoad={load} label="이전 글 보기" />
       ) : (
         <EndOfList text={endText} />
       )}

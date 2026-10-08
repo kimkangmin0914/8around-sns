@@ -9,7 +9,7 @@ export function sectionLabel(pathname: string) {
   if (pathname.startsWith("/posts/")) return "Thread";
   if (pathname.startsWith("/login")) return "Log in";
   if (pathname.startsWith("/signup")) return "Sign up";
-  if (pathname.startsWith("/onboarding")) return "Welcome";
+  if (pathname.startsWith("/onboarding")) return "Sign up";
   if (pathname.startsWith("/brand")) return "Brand";
   return "beside";
 }

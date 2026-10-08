@@ -9,6 +9,7 @@ import {
 } from "@/lib/validation";
 import {
   databaseFailure,
+  readFailure,
   ok,
   uncertainWrite,
   type ActionResult,
@@ -42,7 +43,7 @@ export async function setFollowing(
       .select("id,username,display_name")
       .eq("id", followee_id)
       .maybeSingle();
-    if (targetError) return databaseFailure(targetError.code);
+    if (targetError) return readFailure;
     if (!target)
       return { status: "input", message: "사용자를 찾을 수 없어요." };
     if (following) {
@@ -70,8 +71,8 @@ export async function setFollowing(
     revalidatePath("/");
     return ok(
       following
-        ? `${target.display_name}님을 팔로우해요.`
-        : `${target.display_name}님 팔로우를 그만뒀어요.`,
+        ? `${target.display_name}님을 팔로우했어요.`
+        : `${target.display_name}님 팔로우를 취소했어요.`,
       { following },
     );
   } catch {

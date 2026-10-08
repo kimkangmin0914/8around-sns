@@ -17,11 +17,7 @@ export default async function PeoplePage() {
       <div className="page-wide">
         <section className="section" data-tight>
           <span className="section-eyebrow eyebrow">사람들</span>
-          <h1 className="page-title">곁에 둘 사람</h1>
-          <p className="page-lede">
-            최근에 온 사람부터 보여요. 팔로우하면 그 사람의 글이 팔로잉 피드에
-            모여요.
-          </p>
+          <h1 className="page-title">모든 사람</h1>
           {viewer.status === "guest" && (
             <div style={{ marginTop: 20 }}>
               <ButtonLink
@@ -50,15 +46,13 @@ export default async function PeoplePage() {
                 initial={people.items}
                 next={people.next}
                 layout="tiles"
-                endText="지금 beside에 있는 사람은 여기까지예요."
+                endText="모든 사람을 봤어요."
                 empty={
                   <EmptyState
                     tone="zen"
                     icon="people"
-                    title="아직 아무도 없어요"
-                  >
-                    첫 번째 사람이 되어 주세요.
-                  </EmptyState>
+                    title="아직 가입한 사람이 없어요"
+                  />
                 }
               />
             </div>

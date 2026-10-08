@@ -81,7 +81,9 @@ export function SessionBoundary({
         }}
       >
         <Loader size={28} label="로그인 상태 확인 중" />
-        <p>로그인 상태가 바뀌었어요. 화면을 다시 맞추고 있어요.</p>
+        <p>
+          다른 탭에서 로그인 상태가 바뀌었어요. 화면을 다시 불러오고 있어요.
+        </p>
       </div>
     );
   return children;

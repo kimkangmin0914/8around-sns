@@ -117,7 +117,7 @@
 }
 .error {
   color: var(--danger);
-  animation: rise var(--t-med) var(--ease-out);
+  animation: global(rise) var(--t-med) var(--ease-out);
 }
 .ok {
   color: var(--success);

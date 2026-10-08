@@ -61,7 +61,7 @@ export function OnboardingFlow({
           setChecked({
             username,
             available: null,
-            message: "확인하지 못했어요.",
+            message: "사용할 수 있는지 확인하지 못했어요.",
           });
       }
     }, 380);
@@ -95,7 +95,7 @@ export function OnboardingFlow({
               tone: "hint",
               text: (
                 <span className={styles.checking}>
-                  <Loader size={14} label="확인 중" /> 쓸 수 있는지 보고 있어요
+                  <Loader size={14} label="확인 중" /> 확인하는 중
                 </span>
               ),
             }
@@ -111,7 +111,7 @@ export function OnboardingFlow({
               }
             : {
                 tone: "hint",
-                text: "영문 소문자·숫자·밑줄 3~20자. 주소에 쓰여요: /u/이름",
+                text: "영문 소문자·숫자·밑줄(_) 3~20자. 프로필 주소(/u/이름)에 쓰여요.",
               };
 
   async function submit(form: HTMLFormElement) {
@@ -170,7 +170,7 @@ export function OnboardingFlow({
       stepper={<Stepper step={2} />}
       eyebrow="프로필"
       title="어떻게 불러드릴까요?"
-      lede="가운데 칸이 당신의 색으로 채워지고 있어요. 이름과 주소는 모두에게 보이고, 지금은 바꿀 수 없어요."
+      lede="프로필은 모두에게 보이고, 나중에 바꿀 수 없어요."
     >
       <form
         className={styles.form}
@@ -240,7 +240,7 @@ export function OnboardingFlow({
         <TextArea
           label="소개 (선택)"
           name="bio"
-          placeholder="무엇을 좋아하는지, 어떤 이야기를 나누고 싶은지"
+          placeholder="좋아하는 것, 쓰고 싶은 이야기"
           value={bio}
           rows={3}
           disabled={pending}

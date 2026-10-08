@@ -57,7 +57,7 @@ export function AuthForm({
     : signup && !longEnough
       ? `비밀번호는 ${PASSWORD_MIN}자 이상으로 정해 주세요.`
       : tooLong
-        ? "너무 길어요. 영문·숫자 기준 72자까지 쓸 수 있어요."
+        ? "비밀번호가 너무 길어요. 영문·숫자 기준 72자까지 쓸 수 있어요."
         : null;
 
   async function submit(form: HTMLFormElement) {
@@ -92,7 +92,7 @@ export function AuthForm({
     } catch {
       setFailure({
         status: "uncertain",
-        message: "결과를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.",
+        message: "결과를 확인하지 못했어요. 잠시 후 로그인해 보세요.",
       });
     } finally {
       busy.current = false;
@@ -188,8 +188,8 @@ export function AuthForm({
           <p className={styles.note}>
             <Icon name="info" size={16} />
             <span>
-              이메일 인증 없이 바로 시작해요. 다른 서비스에서 쓰는 비밀번호는
-              피해 주세요. 지금은 메일로 비밀번호를 찾을 수 없어요.
+              비밀번호는 메일로 찾을 수 없어요. 다른 곳에서 쓰지 않는 비밀번호를
+              정해 주세요.
             </span>
           </p>
         )}
@@ -205,7 +205,7 @@ export function AuthForm({
         </Button>
       </form>
       <p className={styles.switch}>
-        {signup ? "이미 계정이 있나요? " : "처음 오셨나요? "}
+        {signup ? "이미 계정이 있나요? " : "계정이 없나요? "}
         <Link
           className="link"
           href={
@@ -214,7 +214,7 @@ export function AuthForm({
               : "/signup"
           }
         >
-          {signup ? "로그인" : "1분 만에 가입하기"}
+          {signup ? "로그인" : "회원가입"}
         </Link>
       </p>
     </>

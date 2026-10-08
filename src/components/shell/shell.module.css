@@ -24,7 +24,13 @@
   height: 48px;
   border-radius: var(--r-m);
 }
+.logo svg {
+  transition: transform 600ms var(--ease-spring);
+}
 @media (hover: hover) {
+  .logo:hover svg {
+    transform: perspective(160px) rotateX(24deg) rotateY(-28deg);
+  }
   .logo:hover svg path {
     transform: scale(0.8) rotate(45deg);
   }

@@ -30,6 +30,7 @@
   font-size: var(--text-m);
   font-weight: 560;
   pointer-events: auto;
+  transform-origin: 50% 100%;
   animation: toast-in var(--t-slow) var(--ease-spring) both;
 }
 .toast[data-leaving] {
@@ -38,7 +39,7 @@
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.96);
+    transform: perspective(600px) rotateX(-70deg) translateY(12px);
   }
 }
 @keyframes toast-out {

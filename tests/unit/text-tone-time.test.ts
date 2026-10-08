@@ -27,6 +27,30 @@ describe("본문 토큰", () => {
       tokenize("javascript:alert(1)").every((t) => t.kind === "text"),
     ).toBe(true);
   });
+  it("링크 바로 뒤 조사는 링크에 넣지 않는다", () => {
+    const tokens = tokenize("https://naver.com에서 봤어요");
+    expect(tokens[0]).toEqual({
+      kind: "link",
+      value: "https://naver.com",
+      href: "https://naver.com/",
+    });
+    expect(tokens[1]).toEqual({ kind: "text", value: "에서 봤어요" });
+  });
+  it("사용자 정보가 붙은 주소는 링크로 만들지 않는다", () =>
+    expect(
+      tokenize("https://user:pw@evil.test/x").every((t) => t.kind === "text"),
+    ).toBe(true));
+  it("괄호는 짝이 맞을 때만 링크에 남긴다", () => {
+    expect(
+      tokenize("https://ko.wikipedia.org/wiki/Foo_(bar)")[0],
+    ).toMatchObject({
+      kind: "link",
+      value: "https://ko.wikipedia.org/wiki/Foo_(bar)",
+    });
+    const wrapped = tokenize("(https://around.test/a)");
+    expect(wrapped[1]).toMatchObject({ value: "https://around.test/a" });
+    expect(wrapped[2]).toEqual({ kind: "text", value: ")" });
+  });
   it("글 길이에 따라 글자 크기가 달라진다", () => {
     expect(sizeForContent("짧은 글")).toBe("xl");
     expect(sizeForContent("가".repeat(60))).toBe("lg");
@@ -68,6 +92,20 @@ describe("상대 시간", () => {
     [3 * 86400, "3일 전"],
   ])("%i초 전 → %s", (seconds, text) => expect(ago(seconds)).toBe(text));
   it("일주일이 지나면 날짜로", () => expect(ago(10 * 86400)).toBe("9월 28일"));
+  it("하루 이상 지나면 서울 날짜로 센다", () => {
+    // 10/06 22:00 KST seen at 10/08 00:30 KST: two calendar days.
+    expect(
+      relativeTime("2026-10-06T13:00:00Z", new Date("2026-10-07T15:30:00Z")),
+    ).toBe("2일 전");
+    // 10/07 00:10 KST seen at 10/08 23:30 KST: yesterday.
+    expect(
+      relativeTime("2026-10-06T15:10:00Z", new Date("2026-10-08T14:30:00Z")),
+    ).toBe("어제");
+    // 00:10 → 23:50 the same day rounds to 24h but is not yesterday.
+    expect(
+      relativeTime("2026-10-07T15:10:00Z", new Date("2026-10-08T14:50:00Z")),
+    ).toBe("24시간 전");
+  });
   it("해가 바뀌면 연도까지", () => expect(ago(400 * 86400)).toMatch(/^2025년/));
 });
 

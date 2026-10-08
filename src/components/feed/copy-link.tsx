@@ -15,10 +15,22 @@ export function CopyLink({ path, label }: { path: string; label: string }) {
       data-done={done || undefined}
       aria-label={label}
       onClick={async () => {
+        const url = new URL(path, window.location.origin).href;
+        // Phones get the system share sheet; everyone else copies.
+        if (
+          typeof navigator.share === "function" &&
+          window.matchMedia("(pointer: coarse)").matches
+        ) {
+          try {
+            await navigator.share({ url });
+            return;
+          } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError")
+              return;
+          }
+        }
         try {
-          await navigator.clipboard.writeText(
-            new URL(path, window.location.origin).href,
-          );
+          await navigator.clipboard.writeText(url);
           setDone(true);
           toast({ tone: "success", message: "링크를 복사했어요." });
           window.setTimeout(() => setDone(false), 1600);

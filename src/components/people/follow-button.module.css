@@ -66,8 +66,16 @@
     opacity var(--t-fast) var(--ease-std),
     transform var(--t-med) var(--ease-out);
 }
+.face[data-pop] {
+  animation: flip 460ms var(--ease-spring);
+}
 .face[data-pop] .on svg {
   animation: pop 520ms var(--ease-spring);
+}
+@keyframes flip {
+  from {
+    transform: perspective(240px) rotateX(-95deg);
+  }
 }
 @keyframes pop {
   0% {

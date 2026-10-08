@@ -4,7 +4,7 @@
   align-items: center;
   gap: 12px;
   padding: 16px var(--gutter);
-  animation: rise var(--t-slow) var(--ease-out) both;
+  animation: global(rise) var(--t-slow) var(--ease-out) both;
 }
 .row::before {
   content: "";

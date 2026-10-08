@@ -23,7 +23,7 @@ function env() {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
     values.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) throw new Error("Run `npm run db:env` first.");
-  if (!/^http:\/\/(127\.0\.0\.1|localhost)/.test(url))
+  if (!/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?(\/|$)/.test(url))
     throw new Error("DB rule tests only run against a local Supabase.");
   return { url, key };
 }
@@ -157,7 +157,8 @@ describe("댓글의 계층", () => {
     const { error } = await alice
       .from("comments")
       .insert({ post_id: other, parent_id: rootId, content: "cross" });
-    expect(error).not.toBeNull();
+    // The parent guard trigger runs before the composite foreign key.
+    expect(error?.code).toBe("23514");
   });
 });
 

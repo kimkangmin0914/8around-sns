@@ -1,5 +1,6 @@
 .tile {
   position: relative;
+  transform-origin: 50% 100%;
   min-height: 236px;
   overflow: hidden;
   background: var(--tone);
@@ -11,7 +12,7 @@
 @keyframes tile-rise {
   from {
     opacity: 0;
-    transform: translateY(28px) scale(0.98);
+    transform: perspective(900px) rotateX(22deg) translateY(32px);
   }
 }
 .link {
@@ -38,6 +39,7 @@
 .name {
   position: relative;
   z-index: 1;
+  max-width: calc(100% - 80px);
   font-size: var(--text-xl);
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -46,6 +48,7 @@
 .handle {
   position: relative;
   z-index: 1;
+  max-width: calc(100% - 80px);
   font-family: var(--font-wide);
   font-variation-settings: "wdth" 110;
   font-size: var(--text-s);
@@ -74,20 +77,10 @@
 .meta b {
   font-weight: 800;
 }
-.initial {
+.mark {
   position: absolute;
-  right: 12px;
-  top: 8px;
-  font-family: var(--font-wide);
-  font-variation-settings: "wdth" 112;
-  font-size: 5.5rem;
-  font-weight: 800;
-  line-height: 0.85;
-  letter-spacing: -0.06em;
-  opacity: 0.22;
-  transition:
-    transform 450ms var(--ease-spring),
-    opacity 350ms var(--ease-std);
+  top: 18px;
+  right: 18px;
 }
 .action {
   position: absolute;
@@ -99,9 +92,9 @@
   .tile:hover {
     background: var(--tone-deep);
   }
-  .tile:hover .initial {
-    transform: translate(-6px, 6px) rotate(-6deg);
-    opacity: 0.4;
+  .tile:hover {
+    --seat-rx: 22deg;
+    --seat-ry: -26deg;
   }
 }
 .link:focus-visible {

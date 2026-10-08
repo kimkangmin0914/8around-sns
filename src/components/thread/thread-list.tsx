@@ -5,15 +5,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { loadThreads } from "@/server/actions/comments";
 import type { Thread, ThreadComment } from "@/server/queries/comments";
-import { mergeNewestFirst } from "@/lib/list";
-import { fullTime, relativeTime } from "@/lib/time";
+import { droppedRows, mergeNewestFirst } from "@/lib/list";
 import { Avatar } from "@/components/ui/avatar";
+import { RelativeTime } from "@/components/ui/relative-time";
 import { RichText } from "@/components/ui/rich-text";
 import { Icon } from "@/components/icons/icon";
 import { ButtonLink } from "@/components/ui/button";
 import { LoadMore } from "@/components/ui/load-more";
 import { useToast } from "@/components/ui/toast";
-import { CommentComposer } from "@/components/thread/comment-composer";
+import {
+  CommentComposer,
+  type PostedComment,
+} from "@/components/thread/comment-composer";
 import styles from "./thread.module.css";
 
 type Me = { id: string; displayName: string; username: string } | null;
@@ -33,18 +36,23 @@ function Comment({
   onReply,
   canReply,
   fresh,
+  byAuthor,
 }: {
   comment: ThreadComment;
   depth: 0 | 1;
   onReply: () => void;
   canReply: boolean;
   fresh: boolean;
+  /** Written by the person who wrote the post. */
+  byAuthor: boolean;
 }) {
   const name = comment.author?.display_name ?? "알 수 없는 사람";
   return (
     <article
       id={`comment-${comment.id}`}
       className={styles.comment}
+      tabIndex={-1}
+      data-nav-item=""
       data-depth={depth}
       data-fresh={fresh || undefined}
     >
@@ -72,20 +80,14 @@ function Comment({
           ) : (
             <span className={styles.name}>{name}</span>
           )}
+          {byAuthor && <span className={styles.authorTag}>글쓴이</span>}
           {comment.author && (
             <span className={styles.handle}>@{comment.author.username}</span>
           )}
           <span className={styles.meta} aria-hidden="true">
             ·
           </span>
-          <time
-            className={styles.meta}
-            dateTime={comment.created_at}
-            title={fullTime(comment.created_at)}
-            suppressHydrationWarning
-          >
-            {relativeTime(comment.created_at)}
-          </time>
+          <RelativeTime iso={comment.created_at} className={styles.meta} />
         </header>
         <RichText text={comment.content} className={styles.body} />
         <div className={styles.commentFoot}>
@@ -94,6 +96,7 @@ function Comment({
               type="button"
               className={styles.replyButton}
               onClick={onReply}
+              aria-label={`${name}님에게 답글`}
             >
               <Icon name="reply" size={16} />
               답글
@@ -107,12 +110,14 @@ function Comment({
 
 export function ThreadList({
   postId,
+  postAuthorId,
   initial,
   next,
   me,
   guestHref,
 }: {
   postId: string;
+  postAuthorId: string | null;
   initial: Thread[];
   next: string | null;
   me: Me;
@@ -122,7 +127,8 @@ export function ThreadList({
   const router = useRouter();
   const toast = useToast();
   const [more, setMore] = useState<Thread[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
+  // undefined until a page has been loaded; then the server's next cursor.
+  const [cursor, setCursor] = useState<string | null | undefined>(undefined);
   const [loadState, setLoadState] = useState<"idle" | "loading" | "error">(
     "idle",
   );
@@ -130,17 +136,34 @@ export function ThreadList({
   const [target, setTarget] = useState<ReplyTarget | null>(null);
   const [fresh, setFresh] = useState<string | null>(null);
   const counter = useRef(0);
+  const previous = useRef(initial);
+  const scrolledTo = useRef<string | null>(null);
+  const focusFresh = useRef(true);
+
+  // A new comment pushes the oldest thread off the refreshed first page;
+  // keep it (at the top of the loaded pages) instead of losing it.
+  useEffect(() => {
+    const dropped = droppedRows(previous.current, initial);
+    previous.current = initial;
+    if (dropped.length && more.length)
+      setMore((list) => mergeNewestFirst(dropped, list));
+  }, [initial, more.length]);
 
   const threads = mergeNewestFirst(initial, more).map((thread) => {
     // A refreshed first page wins for replies; older pages keep theirs.
     const latest = initial.find((item) => item.id === thread.id);
     return latest ?? thread;
   });
-  const activeCursor = more.length ? cursor : next;
+  const activeCursor = cursor === undefined ? next : cursor;
 
   // Deep links (#comment-…) open the right thread, then scroll and flash.
   useEffect(() => {
-    const hash = decodeURIComponent(window.location.hash.slice(1));
+    let hash = "";
+    try {
+      hash = decodeURIComponent(window.location.hash.slice(1));
+    } catch {
+      return; // A malformed hash is ignored, not an error page.
+    }
     if (!hash.startsWith("comment-")) return;
     const id = hash.slice("comment-".length);
     const owner = initial.find((thread) =>
@@ -154,13 +177,20 @@ export function ThreadList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // When something new (or deep-linked) is on screen, bring it into view.
+  // When something new (or deep-linked) is on screen, bring it into view
+  // once, and give it focus so keyboard users continue from there.
   useEffect(() => {
-    if (!fresh) return;
+    if (!fresh || scrolledTo.current === fresh) return;
     const node = document.getElementById(`comment-${fresh}`);
     if (!node) return;
-    node.scrollIntoView({ block: "center", behavior: "smooth" });
-  }, [fresh, initial]);
+    scrolledTo.current = fresh;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (focusFresh.current) node.focus({ preventScroll: true });
+    node.scrollIntoView({
+      block: "center",
+      behavior: still ? "auto" : "smooth",
+    });
+  }, [fresh, initial, more]);
 
   /** Replies attach to the top-level comment; answering a reply adds an @mention. */
   function reply(rootId: string, to: ThreadComment) {
@@ -175,17 +205,53 @@ export function ThreadList({
         : null;
     setTarget({
       rootId,
-      name: to.author?.display_name ?? "작성자",
+      name: to.author?.display_name ?? "알 수 없는 사람",
       username: mention,
       key: counter.current,
     });
     setExpanded((set) => new Set(set).add(rootId));
   }
 
-  function posted(id: string, parentId: string | null) {
+  function posted(comment: PostedComment) {
+    const { id, parentId } = comment;
     setFresh(id);
-    setTarget(null);
-    if (parentId) setExpanded((set) => new Set(set).add(parentId));
+    // Only the composer that posted closes; a reply draft elsewhere stays.
+    if (parentId)
+      setTarget((current) => (current?.rootId === parentId ? null : current));
+    // A reply's composer goes away, so its comment takes focus; after a
+    // top-level comment the person stays in the root composer.
+    focusFresh.current = Boolean(parentId);
+    if (parentId) {
+      setExpanded((set) => new Set(set).add(parentId));
+      // Threads from older pages are not refreshed by the server; add the
+      // reply to them directly.
+      if (me)
+        setMore((list) =>
+          list.map((thread) =>
+            thread.id === parentId &&
+            !thread.replies.some((reply) => reply.id === id)
+              ? {
+                  ...thread,
+                  replies: [
+                    ...thread.replies,
+                    {
+                      id,
+                      post_id: postId,
+                      parent_id: parentId,
+                      content: comment.content,
+                      created_at: comment.createdAt,
+                      author: {
+                        id: me.id,
+                        username: me.username,
+                        display_name: me.displayName,
+                      },
+                    },
+                  ],
+                }
+              : thread,
+          ),
+        );
+    }
     toast({
       tone: "success",
       message: parentId ? "답글을 남겼어요." : "댓글을 남겼어요.",
@@ -220,11 +286,10 @@ export function ThreadList({
         ) : (
           <div className={styles.join}>
             <p>
-              <strong>로그인하면 대화에 낄 수 있어요.</strong>
-              <span>댓글과 답글은 모두에게 보여요.</span>
+              <strong>댓글을 남기려면 로그인해 주세요.</strong>
             </p>
             <ButtonLink href={guestHref} size="s">
-              <Icon name="login" size={16} /> 로그인하고 댓글 쓰기
+              <Icon name="login" size={16} /> 로그인
             </ButtonLink>
           </div>
         )}
@@ -233,7 +298,7 @@ export function ThreadList({
       {threads.length === 0 ? (
         <div className={styles.none}>
           <Icon name="comment" size={22} />
-          <p>아직 댓글이 없어요. 첫 마디를 건네 보세요.</p>
+          <p>아직 댓글이 없어요.</p>
         </div>
       ) : (
         <ol className={styles.list} aria-label="댓글">
@@ -250,6 +315,9 @@ export function ThreadList({
                   comment={thread}
                   depth={0}
                   canReply
+                  byAuthor={
+                    !!postAuthorId && thread.author?.id === postAuthorId
+                  }
                   fresh={fresh === thread.id}
                   onReply={() => reply(thread.id, thread)}
                 />
@@ -257,7 +325,7 @@ export function ThreadList({
                   <div className={styles.replies}>
                     {total > 0 && (
                       <ol
-                        aria-label={`${thread.author?.display_name ?? "작성자"}님 댓글의 답글 ${total}개`}
+                        aria-label={`${thread.author?.display_name ?? "알 수 없는 사람"}님 댓글의 답글 ${total}개`}
                       >
                         {shown.map((item) => (
                           <li key={item.id}>
@@ -265,6 +333,10 @@ export function ThreadList({
                               comment={item}
                               depth={1}
                               canReply
+                              byAuthor={
+                                !!postAuthorId &&
+                                item.author?.id === postAuthorId
+                              }
                               fresh={fresh === item.id}
                               onReply={() => reply(thread.id, item)}
                             />
@@ -304,7 +376,7 @@ export function ThreadList({
                     )}
                     {replying && me && target && (
                       <CommentComposer
-                        key={target.key}
+                        key={thread.id}
                         userId={me.id}
                         displayName={me.displayName}
                         postId={postId}
@@ -313,9 +385,17 @@ export function ThreadList({
                           name: target.name,
                           username: target.username,
                         }}
-                        autoFocus
+                        focusKey={target.key}
                         onPosted={posted}
-                        onCancel={() => setTarget(null)}
+                        onCancel={() => {
+                          setTarget(null);
+                          // Hand focus back to the comment being answered.
+                          requestAnimationFrame(() =>
+                            document
+                              .getElementById(`comment-${thread.id}`)
+                              ?.focus({ preventScroll: true }),
+                          );
+                        }}
                       />
                     )}
                   </div>
@@ -326,11 +406,7 @@ export function ThreadList({
         </ol>
       )}
       {activeCursor && (
-        <LoadMore
-          state={loadState}
-          onLoad={loadMore}
-          label="이전 댓글 더 보기"
-        />
+        <LoadMore state={loadState} onLoad={loadMore} label="이전 댓글 보기" />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { loadPeople } from "@/server/actions/follows";
 import type { PersonEntry } from "@/server/queries/people";
 import { PersonRow } from "@/components/people/person-row";
@@ -26,13 +26,37 @@ export function PeopleList({
   endText: string;
 }) {
   const [more, setMore] = useState<PersonEntry[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
+  // undefined until a page has been loaded; then the server's next cursor.
+  const [cursor, setCursor] = useState<string | null | undefined>(undefined);
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
+  const previous = useRef(initial);
+
+  // A refresh can push the last people of the first page past the boundary;
+  // keep them right after the first page. Only the tail counts: someone
+  // missing from the middle was removed (an unfollow), not pushed out.
+  useEffect(() => {
+    const kept = new Set(initial.map((person) => person.id));
+    const before = previous.current;
+    let last = -1;
+    before.forEach((person, index) => {
+      if (kept.has(person.id)) last = index;
+    });
+    const dropped = before
+      .slice(last + 1)
+      .filter((person) => !kept.has(person.id));
+    previous.current = initial;
+    if (dropped.length && more.length)
+      setMore((list) => [
+        ...dropped.filter((person) => !list.some((p) => p.id === person.id)),
+        ...list,
+      ]);
+  }, [initial, more.length]);
+
   const seen = new Set<string>();
   const items = [...initial, ...more].filter((person) =>
     seen.has(person.id) ? false : (seen.add(person.id), true),
   );
-  const activeCursor = more.length ? cursor : next;
+  const activeCursor = cursor === undefined ? next : cursor;
 
   async function load() {
     if (!activeCursor || state === "loading") return;

@@ -25,6 +25,7 @@
   position: relative;
   display: inline-block;
   margin-right: 0.22em;
+  transform-origin: 50% 100%;
   color: transparent;
   -webkit-text-stroke: 1.5px var(--ink);
   animation: word-fill 700ms var(--ease-out) both;
@@ -33,7 +34,7 @@
 @keyframes word-fill {
   0% {
     color: transparent;
-    transform: translateY(0.18em);
+    transform: perspective(600px) rotateX(-85deg) translateY(0.12em);
     opacity: 0;
   }
   35% {
@@ -56,7 +57,7 @@
   0% {
     color: transparent;
     -webkit-text-stroke-color: var(--accent);
-    transform: translateY(0.18em);
+    transform: perspective(600px) rotateX(-85deg) translateY(0.12em);
     opacity: 0;
   }
   35% {
@@ -97,14 +98,14 @@
   color: var(--ink-2);
   font-size: var(--text-l);
   line-height: 1.6;
-  animation: rise var(--t-slow) var(--ease-out) 900ms both;
+  animation: global(rise) var(--t-slow) var(--ease-out) 900ms both;
 }
 .heroActions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 32px;
-  animation: rise var(--t-slow) var(--ease-out) 1050ms both;
+  animation: global(rise) var(--t-slow) var(--ease-out) 1050ms both;
 }
 
 /* People moving around the headline, like a shared canvas. */
@@ -171,9 +172,12 @@
 }
 
 .peek {
+  --depth: 14px;
   position: absolute;
   z-index: 0;
   background: var(--tone);
+  translate: calc(var(--tx, 0) * var(--depth)) calc(var(--ty, 0) * var(--depth));
+  transition: translate 900ms var(--ease-out);
   animation: peek-in 900ms var(--ease-out) both;
 }
 .peek[data-pos="left"] {
@@ -190,6 +194,7 @@
   width: calc(var(--col-aside) * 0.38);
   height: 52%;
   --from: translateY(-100%);
+  --depth: -22px;
   animation-delay: 450ms;
 }
 .peek[data-pos="bottom"] {
@@ -198,6 +203,7 @@
   width: calc(var(--col-aside) * 0.5);
   height: 18%;
   --from: translateY(100%);
+  --depth: 30px;
   animation-delay: 600ms;
 }
 @keyframes peek-in {
@@ -393,6 +399,29 @@
   }
 }
 
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .tile {
+      transform-origin: 50% 100%;
+      animation: tile-tip linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 70%;
+    }
+    .tile[data-slot="thread"] {
+      animation-range: entry 15% entry 80%;
+    }
+    .tile[data-slot="follow"] {
+      animation-range: entry 25% entry 90%;
+    }
+  }
+}
+@keyframes tile-tip {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(28deg) translateY(56px);
+  }
+}
+
 /* ───────── Live feed band ───────── */
 .liveHead {
   display: flex;
@@ -402,34 +431,10 @@
   flex-wrap: wrap;
 }
 .liveTitle {
-  margin-top: 8px;
   font-size: var(--text-2xl);
   font-weight: 800;
   letter-spacing: -0.045em;
 }
-.live {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ink-3);
-  font-size: var(--text-s);
-  font-weight: 600;
-}
-.live::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--tone-lime-deep);
-  box-shadow: 0 0 0 0 var(--tone-lime);
-  animation: pulse 2s ease-out infinite;
-}
-@keyframes pulse {
-  70% {
-    box-shadow: 0 0 0 8px transparent;
-  }
-}
-
 .joinBand {
   position: relative;
   display: flex;

@@ -122,6 +122,19 @@ describe("요청 경계", () => {
       validateComment({ post_id: UUID, parent_id: "nope", content: "a" }).ok,
     ).toBe(false);
   });
+  it("대문자 UUID는 소문자로 맞춘다", () => {
+    const upper = UUID.toUpperCase();
+    expect(
+      validateComment({ post_id: upper, parent_id: upper, content: "a" }),
+    ).toEqual({
+      ok: true,
+      value: { post_id: UUID, parent_id: UUID, content: "a" },
+    });
+    expect(validateFollow({ followee_id: upper, following: "false" })).toEqual({
+      ok: true,
+      value: { followee_id: UUID, following: false },
+    });
+  });
   it("팔로우 요청은 true/false만", () => {
     expect(validateFollow({ followee_id: UUID, following: "true" })).toEqual({
       ok: true,
@@ -164,6 +177,10 @@ describe("로그인 후 돌아갈 곳", () => {
     ["//evil.com", null],
     ["https://evil.com", null],
     ["/\\evil.com", null],
+    ["/\t/evil.com", null],
+    ["/\n/evil.com", null],
+    ["/\r/evil.com", null],
+    ["/posts/1?tab=a#comment-1", "/posts/1?tab=a#comment-1"],
     [null, null],
   ])("%j → %j", (raw, expected) => expect(safeNext(raw)).toBe(expected));
 });

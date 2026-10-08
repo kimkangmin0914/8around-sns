@@ -6,7 +6,7 @@ import { Icon } from "@/components/icons/icon";
 import { useShell } from "@/components/shell/shell-context";
 
 export function ComposeButton({
-  children = "새 글 쓰기",
+  children = "글쓰기",
   ...props
 }: Omit<ComponentProps<typeof Button>, "onClick" | "children"> & {
   children?: string;

@@ -22,7 +22,7 @@ export function readFields<const T extends readonly string[]>(
 ): Result<Record<T[number], string>> {
   for (const key of form.keys()) {
     if (!keys.includes(key) && !key.startsWith("$ACTION_"))
-      return invalid("허용되지 않은 입력 항목입니다.");
+      return invalid("보낼 수 없는 항목이 있어요. 새로고침해 주세요.");
   }
   const values: Record<string, string> = {};
   for (const key of keys) {
@@ -38,9 +38,9 @@ export function validateContent(value: string): Result<string> {
   const content = normalizeText(value);
   if (!content) return invalid("내용을 입력해 주세요.");
   if (content.includes("\u0000"))
-    return invalid("사용할 수 없는 문자가 포함되어 있어요.");
+    return invalid("사용할 수 없는 문자가 있어요.");
   if (codePointLength(content) > CONTENT_LIMIT)
-    return invalid(`내용은 ${CONTENT_LIMIT}자 이내로 입력해 주세요.`);
+    return invalid(`${CONTENT_LIMIT}자 이내로 줄여 주세요.`);
   return { ok: true, value: content };
 }
 
@@ -48,7 +48,7 @@ export function usernameProblem(raw: string): string | null {
   const username = raw.trim();
   if (!username) return "사용자 이름을 입력해 주세요.";
   if (username.length < 3) return "3자 이상 입력해 주세요.";
-  if (username.length > 20) return "20자 이내로 입력해 주세요.";
+  if (username.length > 20) return "20자 이내로 줄여 주세요.";
   if (/[A-Z]/.test(username)) return "영문은 소문자만 쓸 수 있어요.";
   if (!USERNAME_PATTERN.test(username))
     return "영문 소문자, 숫자, 밑줄(_)만 쓸 수 있어요.";
@@ -70,7 +70,7 @@ export function validateProfile(values: {
   if (display_name.includes("\n"))
     return invalid("이름은 한 줄로 입력해 주세요.");
   if (codePointLength(bio) > BIO_LIMIT)
-    return invalid(`소개는 ${BIO_LIMIT}자 이내로 입력해 주세요.`);
+    return invalid(`소개는 ${BIO_LIMIT}자 이내로 줄여 주세요.`);
   if ((display_name + bio).includes("\u0000"))
     return invalid("사용할 수 없는 문자가 포함되어 있어요.");
   return { ok: true, value: { username, display_name, bio } };
@@ -92,7 +92,7 @@ export function validateCredentials(
     return invalid(`비밀번호는 ${PASSWORD_MIN}자 이상으로 정해 주세요.`);
   if (new TextEncoder().encode(values.password).length > 72)
     return invalid(
-      "비밀번호가 너무 길어요. 영문·숫자 기준 72자, 한글·이모지는 더 짧게 입력해 주세요.",
+      "비밀번호가 너무 길어요. 영문·숫자 기준 72자까지 쓸 수 있어요.",
     );
   return { ok: true, value: { email, password: values.password } };
 }
@@ -115,14 +115,15 @@ export function validateComment(values: {
     !isUuid(values.post_id) ||
     (values.parent_id !== "" && !isUuid(values.parent_id))
   )
-    return invalid("댓글을 남길 글과 답글 대상을 확인해 주세요.");
+    return invalid("댓글을 달 글을 찾지 못했어요. 새로고침해 주세요.");
   const content = validateContent(values.content);
   if (!content.ok) return content;
   return {
     ok: true,
     value: {
-      post_id: values.post_id,
-      parent_id: values.parent_id || null,
+      // Postgres returns ids in lower case; compare like with like.
+      post_id: values.post_id.toLowerCase(),
+      parent_id: values.parent_id ? values.parent_id.toLowerCase() : null,
       content: content.value,
     },
   };
@@ -136,11 +137,11 @@ export function validateFollow(values: {
     !isUuid(values.followee_id) ||
     !["true", "false"].includes(values.following)
   )
-    return invalid("팔로우할 사람과 요청을 확인해 주세요.");
+    return invalid("팔로우 요청을 처리하지 못했어요. 새로고침해 주세요.");
   return {
     ok: true,
     value: {
-      followee_id: values.followee_id,
+      followee_id: values.followee_id.toLowerCase(),
       following: values.following === "true",
     },
   };
@@ -172,15 +173,25 @@ export function parseTab<const T extends readonly string[]>(
   return typeof raw === "string" && tabs.includes(raw) ? raw : null;
 }
 
-/** Only same-site paths are allowed as a post-login destination. */
+/**
+ * Only same-site paths are allowed as a post-login destination. Control
+ * characters are refused because URL parsing drops them ("/\t/evil.com"
+ * would become "//evil.com"), and the result must resolve to this origin.
+ */
 export function safeNext(raw: string | null | undefined) {
   if (
     !raw ||
+    raw.length > 200 ||
     !raw.startsWith("/") ||
     raw.startsWith("//") ||
-    raw.includes("\\") ||
-    raw.length > 200
+    /[\u0000-\u001f\u007f\\]/.test(raw)
   )
     return null;
+  try {
+    const base = "http://beside.invalid";
+    if (new URL(raw, base).origin !== base) return null;
+  } catch {
+    return null;
+  }
   return raw;
 }

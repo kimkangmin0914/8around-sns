@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -23,10 +24,13 @@ type ShellState = {
   viewer: ShellViewer;
   menuOpen: boolean;
   composeOpen: boolean;
+  keysOpen: boolean;
   openMenu: () => void;
   closeMenu: () => void;
   openCompose: () => void;
   closeCompose: () => void;
+  openKeys: () => void;
+  closeKeys: () => void;
   /** Id of something the viewer just created, so lists can highlight it. */
   fresh: string | null;
   markFresh: (id: string | null) => void;
@@ -49,7 +53,26 @@ export function ShellProvider({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [keysOpen, setKeysOpen] = useState(false);
   const [fresh, setFresh] = useState<string | null>(null);
+
+  // Another account (or signing out) closes whatever was open for the last one.
+  const identity = viewer.status === "ready" ? viewer.id : viewer.status;
+  const [seenIdentity, setSeenIdentity] = useState(identity);
+  if (identity !== seenIdentity) {
+    setSeenIdentity(identity);
+    setMenuOpen(false);
+    setComposeOpen(false);
+    setKeysOpen(false);
+    setFresh(null);
+  }
+  // "Just posted" highlights belong to the page they happened on.
+  const pathname = usePathname();
+  const [seenPath, setSeenPath] = useState(pathname);
+  if (pathname !== seenPath) {
+    setSeenPath(pathname);
+    setFresh(null);
+  }
 
   const openMenu = useCallback(() => setMenuOpen(true), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
@@ -58,6 +81,11 @@ export function ShellProvider({
     setComposeOpen(true);
   }, []);
   const closeCompose = useCallback(() => setComposeOpen(false), []);
+  const openKeys = useCallback(() => {
+    setMenuOpen(false);
+    setKeysOpen(true);
+  }, []);
+  const closeKeys = useCallback(() => setKeysOpen(false), []);
   const markFresh = useCallback((id: string | null) => setFresh(id), []);
 
   const value = useMemo(
@@ -65,10 +93,13 @@ export function ShellProvider({
       viewer,
       menuOpen,
       composeOpen,
+      keysOpen,
       openMenu,
       closeMenu,
       openCompose,
       closeCompose,
+      openKeys,
+      closeKeys,
       fresh,
       markFresh,
     }),
@@ -76,10 +107,13 @@ export function ShellProvider({
       viewer,
       menuOpen,
       composeOpen,
+      keysOpen,
       openMenu,
       closeMenu,
       openCompose,
       closeCompose,
+      openKeys,
+      closeKeys,
       fresh,
       markFresh,
     ],

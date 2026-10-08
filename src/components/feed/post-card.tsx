@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { RichText } from "@/components/ui/rich-text";
 import { Icon } from "@/components/icons/icon";
 import { CopyLink } from "@/components/feed/copy-link";
-import { fullTime, relativeTime } from "@/lib/time";
+import { RelativeTime } from "@/components/ui/relative-time";
 import { sizeForContent } from "@/lib/text";
 import styles from "./post-card.module.css";
 
@@ -27,6 +27,9 @@ export function PostCard({
   return (
     <article
       className={styles.post}
+      tabIndex={-1}
+      data-nav-item=""
+      data-href={href}
       data-fresh={fresh || undefined}
       style={{ ["--i" as string]: Math.min(index, 8) }}
       aria-labelledby={`post-${post.id}-author`}
@@ -62,14 +65,7 @@ export function PostCard({
           <span className={styles.dot} aria-hidden="true">
             ·
           </span>
-          <time
-            className={styles.time}
-            dateTime={post.created_at}
-            title={fullTime(post.created_at)}
-            suppressHydrationWarning
-          >
-            {relativeTime(post.created_at)}
-          </time>
+          <RelativeTime iso={post.created_at} className={styles.time} />
         </header>
         <RichText
           text={post.content}
@@ -83,7 +79,7 @@ export function PostCard({
             aria-label={
               post.comment_count
                 ? `댓글 ${post.comment_count}개 보기`
-                : "첫 댓글 달기"
+                : "댓글 달기"
             }
           >
             <Icon name="comment" size={18} />
@@ -93,7 +89,7 @@ export function PostCard({
                 <span className={styles.actionText}>댓글</span>
               </>
             ) : (
-              <span className={styles.actionText}>첫 댓글</span>
+              <span className={styles.actionText}>댓글</span>
             )}
           </Link>
           <CopyLink path={href} label={`${name}님의 글 링크 복사`} />

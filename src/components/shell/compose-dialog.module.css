@@ -9,12 +9,13 @@
   color: var(--ink);
   box-shadow: var(--shadow-float);
   overflow: visible;
+  transform-origin: 50% 0;
   animation: sheet-in var(--t-slow) var(--ease-spring) both;
 }
 .dialog::backdrop {
   background: var(--scrim);
   backdrop-filter: blur(3px);
-  animation: fade var(--t-med) var(--ease-std);
+  animation: global(fade) var(--t-med) var(--ease-std);
 }
 .dialog[data-closing] {
   animation: sheet-out 180ms var(--ease-std) both;
@@ -26,7 +27,7 @@
 @keyframes sheet-in {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(0.97);
+    transform: perspective(1100px) rotateX(-20deg) translateY(28px);
   }
 }
 @keyframes sheet-out {

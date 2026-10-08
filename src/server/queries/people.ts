@@ -22,6 +22,7 @@ export type Relation = {
 export type PersonEntry = Person & {
   relation: Relation | null;
   follower_count: number;
+  post_count: number;
 };
 
 export type ProfileDetail = Person & {
@@ -31,9 +32,12 @@ export type ProfileDetail = Person & {
 
 const PERSON = "id,username,display_name,bio,created_at" as const;
 const PERSON_WITH_COUNT =
-  `${PERSON},followers:follows!follows_followee_id_fkey(count)` as const;
+  `${PERSON},followers:follows!follows_followee_id_fkey(count),posts:posts!posts_author_id_fkey(count)` as const;
 
-type CountRow = Person & { followers: { count: number }[] };
+type CountRow = Person & {
+  followers: { count: number }[];
+  posts?: { count: number }[];
+};
 
 /** Batch-resolves follow state in both directions for many people at once. */
 export async function relationsFor(
@@ -80,9 +84,10 @@ async function withRelations(
     rows.map((row) => row.id),
   );
   if (!relations) return null;
-  return rows.map(({ followers, ...person }) => ({
+  return rows.map(({ followers, posts, ...person }) => ({
     ...person,
     follower_count: followers[0]?.count ?? 0,
+    post_count: posts?.[0]?.count ?? 0,
     relation: relations.get(person.id) ?? null,
   }));
 }

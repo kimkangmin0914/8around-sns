@@ -11,7 +11,7 @@
 }
 .dialog::backdrop {
   background: var(--bg);
-  animation: fade var(--t-med) var(--ease-std);
+  animation: global(fade) var(--t-med) var(--ease-std);
 }
 .dialog[data-closing]::backdrop {
   opacity: 0;
@@ -29,6 +29,8 @@
 .tile {
   --dx: 0px;
   --dy: 0px;
+  --rx: 0deg;
+  --ry: 0deg;
   --delay: 0ms;
   position: relative;
   display: flex;
@@ -52,7 +54,8 @@
 }
 @keyframes tile-in {
   from {
-    transform: translate(var(--dx), var(--dy));
+    transform: perspective(1400px) translate3d(var(--dx), var(--dy), -320px)
+      rotateX(var(--rx)) rotateY(var(--ry));
   }
 }
 @keyframes tile-out {
@@ -69,9 +72,12 @@
   .tile:hover .art,
   .tile:hover .bigIcon,
   .tile:hover .quotes,
-  .tile:hover .markArt,
-  .tile:hover .initial {
+  .tile:hover .markArt {
     transform: translate(-6px, -6px) rotate(-3deg);
+  }
+  .tile:hover .seat {
+    --seat-rx: 22deg;
+    --seat-ry: -26deg;
   }
 }
 .tile:focus-visible {
@@ -85,18 +91,24 @@
   border-top-left-radius: var(--r-m);
   --dx: -60vw;
   --dy: 10vh;
+  --rx: -8deg;
+  --ry: -32deg;
 }
 .tile[data-slot="b"] {
   grid-area: 1 / 4 / 4 / 8;
   --dx: 8vw;
   --dy: -70vh;
   --delay: 40ms;
+  --rx: 30deg;
+  --ry: 6deg;
 }
 .tile[data-slot="c"] {
   grid-area: 1 / 8 / 5 / 11;
   --dx: 30vw;
   --dy: -80vh;
   --delay: 80ms;
+  --rx: 32deg;
+  --ry: 14deg;
 }
 .tile[data-slot="d"] {
   grid-area: 1 / 11 / 5 / 13;
@@ -104,6 +116,8 @@
   --dx: 60vw;
   --dy: -10vh;
   --delay: 20ms;
+  --rx: 6deg;
+  --ry: 32deg;
 }
 .tile[data-slot="e"] {
   grid-area: 5 / 1 / 7 / 5;
@@ -111,12 +125,16 @@
   --dx: -50vw;
   --dy: 70vh;
   --delay: 60ms;
+  --rx: -26deg;
+  --ry: -24deg;
 }
 .tile[data-slot="f"] {
   grid-area: 4 / 5 / 7 / 8;
   --dx: -10vw;
   --dy: 80vh;
   --delay: 100ms;
+  --rx: -32deg;
+  --ry: -6deg;
 }
 .tile[data-slot="g"] {
   grid-area: 5 / 8 / 7 / 13;
@@ -124,6 +142,8 @@
   --dx: 60vw;
   --dy: 60vh;
   --delay: 30ms;
+  --rx: -24deg;
+  --ry: 26deg;
 }
 
 .label {
@@ -143,7 +163,7 @@
 .bigIcon,
 .quotes,
 .markArt,
-.initial {
+.seat {
   position: absolute;
   right: 20px;
   bottom: 20px;
@@ -176,14 +196,6 @@
 }
 .quotes > svg:last-child {
   align-self: flex-end;
-}
-.initial {
-  font-family: var(--font-wide);
-  font-variation-settings: "wdth" 112;
-  font-size: clamp(4.5rem, 3rem + 5vw, 8.5rem);
-  font-weight: 800;
-  line-height: 0.8;
-  letter-spacing: -0.06em;
 }
 .markArt {
   color: currentColor;
@@ -251,7 +263,7 @@
   .bigIcon,
   .quotes,
   .markArt,
-  .initial {
+  .seat {
     right: 12px;
     bottom: 12px;
     transform: scale(0.62);

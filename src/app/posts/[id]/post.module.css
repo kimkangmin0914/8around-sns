@@ -1,3 +1,28 @@
+/* Reading progress: a hairline of Blue that fills as the page scrolls. */
+.progress {
+  position: fixed;
+  z-index: 45;
+  top: 0;
+  left: var(--rail);
+  right: 0;
+  height: 3px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  .progress {
+    animation: read linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes read {
+  to {
+    transform: scaleX(1);
+  }
+}
+
 .back {
   display: inline-flex;
   align-items: center;
@@ -27,7 +52,7 @@
 .post {
   position: relative;
   padding: 32px var(--gutter) 24px;
-  animation: rise var(--t-slow) var(--ease-out) both;
+  animation: global(rise) var(--t-slow) var(--ease-out) both;
 }
 .post::before {
   content: "";
@@ -166,7 +191,6 @@
   font-size: var(--text-m);
   font-weight: 540;
   line-height: 1.5;
-  max-width: 80%;
 }
 .cardStats {
   display: flex;
@@ -178,25 +202,22 @@
 .cardStats b {
   font-weight: 800;
 }
-.cardInitial {
+.cardName,
+.cardHandle {
+  max-width: calc(100% - 84px);
+}
+.cardMark {
   position: absolute;
-  right: 12px;
-  bottom: -8px;
-  font-family: var(--font-wide);
-  font-variation-settings: "wdth" 112;
-  font-size: 6rem;
-  font-weight: 800;
-  line-height: 0.8;
-  letter-spacing: -0.06em;
-  opacity: 0.9;
-  transition: transform 450ms var(--ease-spring);
+  top: 18px;
+  right: 18px;
 }
 @media (hover: hover) {
   .card:hover {
     background: var(--tone-deep);
   }
-  .card:hover .cardInitial {
-    transform: translate(-4px, -6px) rotate(-4deg);
+  .card:hover {
+    --seat-rx: 22deg;
+    --seat-ry: -26deg;
   }
 }
 @media (max-width: 759px) {

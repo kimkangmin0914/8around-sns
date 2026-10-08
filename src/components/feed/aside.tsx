@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { ReadyViewer } from "@/server/queries/viewer";
 import { getProfile, suggestPeople } from "@/server/queries/people";
-import { toneFor, initialOf } from "@/lib/tone";
+import { toneFor } from "@/lib/tone";
 import { Suggestions } from "@/components/people/suggestions";
-import { Icon } from "@/components/icons/icon";
+import { SeatMark } from "@/components/people/seat-mark";
+import { ShortcutsButton } from "@/components/shell/shortcuts";
+import { Count } from "@/components/ui/count";
 import styles from "./aside.module.css";
 
 const REPO = "https://github.com/kimkangmin0914/8around-sns";
@@ -27,9 +29,13 @@ export async function FeedAside({ viewer }: { viewer: ReadyViewer }) {
         >
           <span className={styles.meName}>{viewer.profile.display_name}</span>
           <span className={styles.meHandle}>@{viewer.profile.username}</span>
-          <span className={styles.meInitial} aria-hidden="true">
-            {initialOf(viewer.profile.display_name)}
-          </span>
+          <SeatMark
+            className={styles.meMark}
+            id={viewer.id}
+            posts={profile?.counts.posts ?? 0}
+            seat="self"
+            size="88px"
+          />
         </Link>
         {profile && (
           <ul className={styles.stats}>
@@ -49,9 +55,10 @@ export async function FeedAside({ viewer }: { viewer: ReadyViewer }) {
               <li key={stat.label}>
                 <Link href={stat.href} className={styles.stat}>
                   <span className={styles.statLabel}>{stat.label}</span>
-                  <span className={`num ${styles.statValue}`}>
-                    {stat.value}
-                  </span>
+                  <Count
+                    value={stat.value}
+                    className={`num ${styles.statValue}`}
+                  />
                 </Link>
               </li>
             ))}
@@ -60,38 +67,28 @@ export async function FeedAside({ viewer }: { viewer: ReadyViewer }) {
       </div>
       <div className="aside-block">
         <div className={styles.blockHead}>
-          <h2 className={styles.blockTitle}>곁에 둘 사람</h2>
+          <h2 className={styles.blockTitle}>새로 온 사람</h2>
           <Link href="/people" className="link">
             모두 보기
           </Link>
         </div>
         {!suggestions.ok ? (
-          <p className={styles.quiet}>추천을 불러오지 못했어요.</p>
+          <p className={styles.quiet}>목록을 불러오지 못했어요.</p>
         ) : suggestions.items.length === 0 ? (
-          <p className={styles.quiet}>
-            지금 있는 사람을 모두 팔로우했어요. 새로운 사람이 오면 여기 보여
-            드릴게요.
-          </p>
+          <p className={styles.quiet}>모든 사람을 팔로우하고 있어요.</p>
         ) : (
           <Suggestions initial={suggestions.items} />
         )}
       </div>
-      <SiteFoot shortcut />
+      <SiteFoot />
     </>
   );
 }
 
-export function SiteFoot({ shortcut = false }: { shortcut?: boolean }) {
+export function SiteFoot() {
   return (
     <footer className={`aside-block ${styles.foot}`}>
-      {shortcut && (
-        <p className={styles.shortcut}>
-          <Icon name="keyboard" size={16} />
-          <span>
-            <kbd>N</kbd> 새 글 쓰기
-          </span>
-        </p>
-      )}
+      <ShortcutsButton className={styles.shortcut} />
       <nav className={styles.footLinks} aria-label="사이트 정보">
         <Link href="/brand">디자인 노트</Link>
         <a href={REPO} target="_blank" rel="noopener noreferrer">

@@ -37,6 +37,32 @@
   align-items: center;
   gap: 32px;
 }
+.seats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 8px;
+  margin-top: 24px;
+}
+.seatCard {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 24px 16px 18px;
+  border-radius: var(--r-tile);
+  background: var(--tone);
+  color: var(--tone-ink);
+}
+@media (hover: hover) {
+  .seatCard:hover {
+    --seat-rx: 22deg;
+    --seat-ry: -26deg;
+  }
+}
+.seatCaption {
+  font-size: var(--text-s);
+  font-weight: 650;
+}
+
 .markRow {
   display: flex;
   flex-wrap: wrap;
@@ -90,7 +116,7 @@
   overflow: hidden;
   background: var(--tone);
   color: var(--tone-ink);
-  animation: rise var(--t-slow) var(--ease-out) both;
+  animation: global(rise) var(--t-slow) var(--ease-out) both;
   animation-delay: calc(var(--i) * 50ms);
   transition: background-color 350ms var(--ease-std);
 }

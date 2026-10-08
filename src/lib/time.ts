@@ -29,6 +29,19 @@ const monthFormat = new Intl.DateTimeFormat("ko-KR", {
   month: "long",
 });
 
+const isoDay = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/** Calendar day in Seoul, as a day count, so "어제" means yesterday's date. */
+const dayNumber = (date: Date) => {
+  const [year, month, day] = isoDay.format(date).split("-").map(Number);
+  return Date.UTC(year, month - 1, day) / 86_400_000;
+};
+
 const yearOf = (date: Date) =>
   new Intl.DateTimeFormat("en-US", { timeZone: TIME_ZONE, year: "numeric" })
     .format(date)
@@ -44,7 +57,9 @@ export function relativeTime(iso: string, now = new Date()) {
   if (minutes < 60) return `${minutes}분 전`;
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `${hours}시간 전`;
-  const days = Math.round(hours / 24);
+  const days = dayNumber(now) - dayNumber(date);
+  // 23.5h+ rounds to 24h but can still be today in Seoul.
+  if (days <= 0) return `${hours}시간 전`;
   if (days === 1) return "어제";
   if (days < 7) return `${days}일 전`;
   return yearOf(date) === yearOf(now)

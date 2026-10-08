@@ -15,6 +15,10 @@ html {
     scroll-padding-top: 24px;
   }
 }
+/* The page behind a modal dialog stays put. */
+html:has(dialog[open]:modal) {
+  overflow: hidden;
+}
 
 body {
   margin: 0;

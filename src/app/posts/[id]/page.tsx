@@ -8,13 +8,14 @@ import { getViewer } from "@/server/queries/viewer";
 import { isUuid } from "@/lib/validation";
 import { fullTime } from "@/lib/time";
 import { sizeForContent } from "@/lib/text";
-import { toneFor, initialOf } from "@/lib/tone";
+import { toneFor } from "@/lib/tone";
 import { Avatar } from "@/components/ui/avatar";
 import { RichText } from "@/components/ui/rich-text";
 import { Icon } from "@/components/icons/icon";
 import { ButtonLink } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/empty-state";
 import { FollowButton } from "@/components/people/follow-button";
+import { SeatMark } from "@/components/people/seat-mark";
 import { CopyLink } from "@/components/feed/copy-link";
 import { ThreadList } from "@/components/thread/thread-list";
 import { SiteFoot } from "@/components/feed/aside";
@@ -39,8 +40,10 @@ export async function generateMetadata({
 }
 
 export default async function PostPage({ params }: { params: Params }) {
-  const { id } = await params;
-  if (!isUuid(id)) notFound();
+  const { id: raw } = await params;
+  if (!isUuid(raw)) notFound();
+  // Ids are compared as lower case everywhere (Postgres returns them so).
+  const id = raw.toLowerCase();
   const [result, viewer] = await Promise.all([getPost(id), getViewer()]);
   const backHref = "/";
   if (!result.ok)
@@ -83,6 +86,7 @@ export default async function PostPage({ params }: { params: Params }) {
 
   return (
     <div className="page">
+      <div className={styles.progress} aria-hidden="true" />
       <div className="page-main">
         <section className="section" data-tight>
           <span className="section-eyebrow eyebrow">대화</span>
@@ -154,6 +158,7 @@ export default async function PostPage({ params }: { params: Params }) {
           ) : (
             <ThreadList
               postId={id}
+              postAuthorId={post.author?.id ?? null}
               initial={threads.items}
               next={threads.next}
               me={me}
@@ -188,13 +193,24 @@ export default async function PostPage({ params }: { params: Params }) {
                   <b className="num">{authorProfile.counts.posts}</b> 글
                 </span>
               </span>
-              <span className={styles.cardInitial} aria-hidden="true">
-                {initialOf(authorProfile.display_name)}
-              </span>
+              <SeatMark
+                className={styles.cardMark}
+                id={authorProfile.id}
+                posts={authorProfile.counts.posts}
+                seat={
+                  authorProfile.relation?.self
+                    ? "self"
+                    : authorProfile.relation?.following
+                      ? "taken"
+                      : "open"
+                }
+                viewerTone={viewerId ? toneFor(viewerId) : null}
+                size="72px"
+              />
             </Link>
           </div>
         )}
-        <SiteFoot shortcut={viewer.status === "ready"} />
+        <SiteFoot />
       </aside>
     </div>
   );

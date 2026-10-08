@@ -32,7 +32,7 @@ export function EmptyState({
 /** For failed reads: never pretend an error is an empty list. */
 export function ErrorState({
   title = "불러오지 못했어요",
-  children = "연결이 잠시 불안정했어요. 다시 시도하면 대부분 해결돼요.",
+  children = "잠시 후 다시 시도해 주세요.",
   action,
 }: {
   title?: string;

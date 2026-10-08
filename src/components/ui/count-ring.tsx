@@ -32,7 +32,7 @@ export function CountRing({
         {left <= limit * 0.2 ? left : ""}
       </span>
       <span className="sr-only">
-        {count}자 입력, {limit}자까지 쓸 수 있어요.
+        {limit}자 중 {count}자
       </span>
     </span>
   );

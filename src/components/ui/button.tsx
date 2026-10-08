@@ -45,6 +45,7 @@ export function Button({
   busy = false,
   busyLabel = "처리 중",
   ref,
+  onClick,
   ...rest
 }: Shared & {
   busy?: boolean;
@@ -59,7 +60,16 @@ export function Button({
       data-busy={busy || undefined}
       aria-busy={busy || undefined}
       {...rest}
-      disabled={rest.disabled || busy}
+      // While busy the button stays focusable (aria-disabled), so keyboard
+      // focus is not dropped to <body>; clicks and form submits are ignored.
+      aria-disabled={busy || rest["aria-disabled"] || undefined}
+      onClick={(event) => {
+        if (busy) {
+          event.preventDefault();
+          return;
+        }
+        onClick?.(event);
+      }}
     >
       <span className={styles.label}>{children}</span>
       {busy && (

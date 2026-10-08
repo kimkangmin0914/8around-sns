@@ -10,7 +10,7 @@ export function AboutBento() {
       <div className={styles.aboutHead}>
         <p className="eyebrow">구성</p>
         <h2 id="about-title" className={styles.aboutTitle}>
-          필요한 건 네 가지
+          필요한 것만
         </h2>
       </div>
       <div className={styles.bento}>
@@ -20,10 +20,9 @@ export function AboutBento() {
           data-tone="gold"
           data-slot="post"
         >
-          <span className={styles.tileLabel}>한 줄</span>
+          <span className={styles.tileLabel}>짧은 글</span>
           <span className={styles.tileText}>
-            500자 안에서 지금을. 짧은 글은 크게, 긴 글은 읽기 좋게. 길이가 글자
-            크기를 정해요.
+            500자까지. 짧을수록 크게 보여요.
           </span>
           <span className={styles.tileQuote} aria-hidden="true">
             <Icon name="quote" size={72} strokeWidth={0} fill="currentColor" />
@@ -37,7 +36,7 @@ export function AboutBento() {
         >
           <span className={styles.tileLabel}>댓글과 답글</span>
           <span className={styles.tileText}>
-            누가 누구에게 답했는지, 선으로 이어 보여 줘요.
+            답글은 한 단계, 선으로 이어져요.
           </span>
           <svg
             viewBox="0 0 160 120"
@@ -63,7 +62,7 @@ export function AboutBento() {
         >
           <span className={styles.tileLabel}>팔로우</span>
           <span className={styles.tileText}>
-            곁에 둔 사람의 글만 따로 모아 읽어요.
+            팔로우한 사람의 글만 모아 봐요.
           </span>
           <span className={styles.tileMark} aria-hidden="true">
             <Mark size={96} />
@@ -77,7 +76,7 @@ export function AboutBento() {
         >
           <span className={styles.tileLabel}>여덟 가지 색</span>
           <span className={styles.tileText}>
-            모두에게 여덟 색 중 하나. 이름보다 색이 먼저 눈에 들어와요.
+            사람마다 색이 하나씩 정해져요.
           </span>
           <span className={styles.tileAa} aria-hidden="true">
             Aa

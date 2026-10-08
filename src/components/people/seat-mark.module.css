@@ -1,0 +1,217 @@
+/*
+ * Seat mark — eight tiles in 3D around the viewer's seat.
+ * Layers: root (perspective) → scroll (scroll-driven lean) → plane (pointer
+ * tilt, via --tx/--ty from <Tilt>, or --seat-rx/--seat-ry from a parent's
+ * hover) → tiles (assemble + depth). Only transform and opacity animate.
+ */
+.root {
+  --size: 200px;
+  --owner: var(--tone);
+  --owner-ink: var(--tone-ink);
+  --line: calc(var(--size) * 0.012 + 1px);
+  display: block;
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+  perspective: calc(var(--size) * 4.2);
+  pointer-events: none;
+}
+/* Positioned only when it carries a cursor, so parents can place it freely. */
+.root[data-invite] {
+  position: relative;
+}
+.scroll,
+.plane {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+.plane {
+  grid-template: repeat(3, minmax(0, 1fr)) / repeat(3, minmax(0, 1fr));
+  gap: 9%;
+  transform: rotateX(calc(var(--seat-rx, 0deg) - var(--ty, 0) * 16deg))
+    rotateY(calc(var(--seat-ry, 0deg) + var(--tx, 0) * 20deg));
+  transition: transform 700ms var(--ease-out);
+}
+
+.tile {
+  box-shadow: inset 0 0 0 var(--line)
+    color-mix(in srgb, var(--owner-ink) 42%, transparent);
+}
+.tile[data-solid] {
+  background: var(--owner-ink);
+  box-shadow: 0 calc(var(--size) * 0.05) calc(var(--size) * 0.07)
+    calc(var(--size) * -0.05)
+    color-mix(in srgb, var(--owner-ink) 55%, transparent);
+  transform: translateZ(var(--z));
+}
+
+.seat {
+  grid-area: 2 / 2;
+  display: grid;
+  place-items: center;
+  border-radius: 28% 28% 28% 7%;
+  outline: var(--line) dashed
+    color-mix(in srgb, var(--owner-ink) 62%, transparent);
+  outline-offset: calc(var(--line) * -1);
+  transition:
+    background-color var(--t-med) var(--ease-std),
+    transform 600ms var(--ease-spring);
+}
+.dot {
+  width: 42%;
+  height: 42%;
+  border-radius: 38%;
+  background: var(--tone-ink);
+  transform: scale(0);
+  transition: transform 500ms var(--ease-spring) 120ms;
+}
+
+/* Your own profile: you are the centre. */
+.seat[data-state="self"] {
+  outline-color: transparent;
+  background: var(--owner-ink);
+  transform: translateZ(64px);
+}
+.seat[data-state="self"] .dot {
+  background: var(--owner);
+  transform: none;
+}
+
+/* The viewer follows this person: their colour takes the seat. */
+.seat[data-state="taken"],
+:global([data-seat-scope]):has([aria-pressed="true"]) .seat[data-can-sit] {
+  outline: var(--line) solid var(--owner-ink);
+  outline-offset: 0;
+  background: var(--tone);
+  transform: translateZ(64px);
+}
+.seat[data-state="taken"] .dot,
+:global([data-seat-scope]):has([aria-pressed="true"]) .seat[data-can-sit] .dot {
+  transform: none;
+}
+/* Unfollowed before the server answers: the seat empties at once. */
+:global([data-seat-scope]):has([aria-pressed="false"])
+  .seat[data-state="taken"] {
+  outline: var(--line) dashed
+    color-mix(in srgb, var(--owner-ink) 62%, transparent);
+  outline-offset: calc(var(--line) * -1);
+  background: transparent;
+  transform: none;
+}
+:global([data-seat-scope]):has([aria-pressed="false"])
+  .seat[data-state="taken"]
+  .dot {
+  transform: scale(0);
+}
+@keyframes sit {
+  0% {
+    opacity: 0;
+    transform: translateZ(240px) rotateY(-200deg) scale(0.4);
+  }
+  60% {
+    opacity: 1;
+  }
+}
+
+/* "Your seat": the viewer's name tag glides to the open centre on Follow hover. */
+.invite {
+  position: absolute;
+  z-index: 1;
+  top: 52%;
+  left: 52%;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 2px;
+  opacity: 0;
+  transform: translate(46px, 40px) scale(0.7);
+  transition:
+    opacity var(--t-med) var(--ease-std),
+    transform 520ms var(--ease-spring);
+}
+.invite svg {
+  fill: var(--tone);
+  stroke: var(--owner-ink);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.inviteTag {
+  margin-top: 12px;
+  padding: 3px 9px;
+  border-radius: 10px 10px 10px 3px;
+  background: var(--tone);
+  color: var(--tone-ink);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 0 0 1.5px var(--owner-ink);
+}
+:global([data-seat-scope]):has(
+    [aria-pressed="false"]:is(:hover, :focus-visible)
+  )
+  .invite {
+  opacity: 1;
+  transform: none;
+}
+
+/* The seat flips in only when the viewer has just pressed Follow here. */
+:global([data-seat-scope]):has([aria-pressed="true"])
+  .seat[data-state="open"][data-can-sit] {
+  animation: sit 760ms var(--ease-spring) both;
+}
+
+/* Hero: tiles fly in from their own side and assemble around the seat. */
+.root[data-hero] .tile {
+  animation: assemble 900ms var(--ease-out) both;
+  animation-delay: calc(140ms + var(--i) * 55ms);
+}
+.root[data-hero] .seat:is([data-state="self"], [data-state="taken"]) {
+  animation: sit 760ms var(--ease-spring) 620ms both;
+}
+@keyframes assemble {
+  from {
+    opacity: 0;
+    transform: translate3d(
+        calc(var(--ox) * 150%),
+        calc(var(--oy) * 150%),
+        200px
+      )
+      rotateX(calc(var(--oy) * 75deg)) rotateY(calc(var(--ox) * -75deg));
+  }
+}
+
+/* As the hero scrolls away, the mark leans back into the card. */
+/* Opacity sits on .root: on a preserve-3d layer it would flatten the depth. */
+@supports (animation-timeline: view()) {
+  .root[data-hero] {
+    animation: dim linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 100%;
+  }
+  .root[data-hero] .scroll {
+    animation: lean linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 100%;
+  }
+}
+@keyframes lean {
+  to {
+    transform: rotateX(42deg) rotateZ(-10deg) scale(0.86);
+  }
+}
+@keyframes dim {
+  to {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plane {
+    transform: none;
+  }
+  .root[data-hero],
+  .root[data-hero] .scroll {
+    animation: none;
+  }
+}

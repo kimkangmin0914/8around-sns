@@ -165,7 +165,7 @@ export function Checklist({
   items: { label: string; met: boolean }[];
 }) {
   return (
-    <ul className={styles.checklist} aria-label="조건">
+    <ul className={styles.checklist} aria-label="입력 조건">
       {items.map((item) => (
         <li key={item.label} className={styles.check} data-met={item.met}>
           <Icon

@@ -27,7 +27,7 @@ export function PersonRow({
             {relation?.self && <span className={styles.tag}>나</span>}
             {relation?.followsYou && !relation.self && (
               <span className={styles.tag} data-kind="follows">
-                나를 팔로우
+                {relation.following ? "서로 팔로우" : "나를 팔로우"}
               </span>
             )}
           </span>

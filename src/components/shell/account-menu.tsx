@@ -91,7 +91,7 @@ export function AccountMenu({
               <p className={styles.handle}>
                 {viewer.status === "ready"
                   ? `@${viewer.username}`
-                  : "프로필을 만들고 있어요"}
+                  : "프로필을 아직 만들지 않았어요"}
               </p>
             </div>
           </div>
