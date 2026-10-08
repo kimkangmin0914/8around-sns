@@ -151,6 +151,72 @@
   border: 1px solid var(--line-strong);
 }
 
+.nameFacts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 24px;
+}
+.nameFacts li {
+  display: grid;
+  gap: 6px;
+  padding: 20px 22px;
+  border-radius: var(--r-tile);
+  border: 1px solid var(--grid-strong);
+}
+.nameFacts b {
+  font-family: var(--font-wide);
+  font-variation-settings: "wdth" 120;
+  font-size: var(--text-xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.nameFacts span {
+  color: var(--ink-2);
+  font-size: var(--text-m);
+}
+
+.voice {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 24px;
+}
+.voiceItem {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 20px 22px 22px;
+  border-radius: var(--r-tile);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.voiceRule {
+  font-weight: 760;
+  letter-spacing: -0.025em;
+}
+.voiceDo,
+.voiceDont {
+  display: grid;
+  gap: 2px;
+  font-size: var(--text-m);
+  line-height: 1.5;
+}
+.voiceDo span,
+.voiceDont span {
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+.voiceDo span {
+  color: var(--success);
+}
+.voiceDont {
+  color: var(--ink-3);
+}
+.voiceDont span {
+  color: var(--danger);
+}
+
 .typeGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -260,6 +326,8 @@
   }
 }
 @media (max-width: 759px) {
+  .nameFacts,
+  .voice,
   .typeGrid,
   .motion {
     grid-template-columns: 1fr;

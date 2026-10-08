@@ -173,7 +173,7 @@ export async function completeProfile(
     if (insertError) return databaseFailure(insertError.code);
     if (!saved || saved.id !== data.user.id) return uncertainWrite;
     revalidatePath("/", "layout");
-    return ok("around에 오신 걸 환영해요.", { username: saved.username });
+    return ok("beside에 온 걸 환영해요.", { username: saved.username });
   } catch {
     return uncertainWrite;
   }

@@ -18,7 +18,7 @@ export function FeedList({
   scope,
   authorId,
   empty,
-  endText = "여기까지 모두 읽었어요.",
+  endText = "여기까지 다 읽었어요.",
 }: {
   initial: FeedPost[];
   next: string | null;

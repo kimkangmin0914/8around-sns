@@ -83,7 +83,7 @@ export function PostCard({
             aria-label={
               post.comment_count
                 ? `댓글 ${post.comment_count}개 보기`
-                : "첫 댓글 남기기"
+                : "첫 댓글 달기"
             }
           >
             <Icon name="comment" size={18} />
@@ -93,7 +93,7 @@ export function PostCard({
                 <span className={styles.actionText}>댓글</span>
               </>
             ) : (
-              <span className={styles.actionText}>첫 댓글 남기기</span>
+              <span className={styles.actionText}>첫 댓글</span>
             )}
           </Link>
           <CopyLink path={href} label={`${name}님의 글 링크 복사`} />

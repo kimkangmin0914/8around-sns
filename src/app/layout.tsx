@@ -25,14 +25,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.URL ?? "https://frolicking-muffin-3c6498.netlify.app",
   ),
-  title: { default: "around — 곁에 있는 이야기", template: "%s · around" },
+  title: { default: "beside — 곁에 두는 B면", template: "%s · beside" },
   description:
-    "around는 짧은 글을 올리고, 댓글과 답글로 대화를 잇고, 곁에 두고 싶은 사람을 팔로우하는 작은 SNS예요.",
-  applicationName: "around",
+    "보여주기 위한 앞면 말고, 곁에 둔 사람과 나누는 B면. beside는 짧은 글과 댓글·답글로 이어지는 텍스트 SNS예요.",
+  applicationName: "beside",
   openGraph: {
-    title: "around",
-    description: "한 줄의 글이 대화가 되는 곳.",
-    siteName: "around",
+    title: "beside",
+    description: "Your B-side, beside you. 곁에 두는 B면.",
+    siteName: "beside",
     locale: "ko_KR",
     type: "website",
   },

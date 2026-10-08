@@ -16,8 +16,8 @@ export default async function SignupPage() {
       art={<AuthArt center={<span className={styles.centerYou}>?</span>} />}
       stepper={<Stepper step={1} />}
       eyebrow="회원가입"
-      title="around에 자리를 만들어요"
-      lede="여덟 칸 가운데 비어 있는 자리, 거기가 당신의 자리예요. 먼저 로그인에 쓸 이메일과 비밀번호를 정해 주세요."
+      title="가운데 자리가 비어 있어요"
+      lede="여덟 칸이 둘러싼 가운데, 거기가 당신 자리예요. 로그인에 쓸 이메일과 비밀번호부터 정해요."
     >
       <AuthForm mode="signup" />
     </AuthShell>

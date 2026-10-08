@@ -16,7 +16,7 @@ export function Rail() {
   const items = navItems(viewer);
   return (
     <header className={styles.rail}>
-      <Link href="/" className={styles.logo} aria-label="around 홈">
+      <Link href="/" className={styles.logo} aria-label="beside 홈">
         <Mark size={30} variant="tones" />
       </Link>
       <p className={styles.railLabel} aria-hidden="true">
@@ -89,7 +89,7 @@ export function MobileBars() {
   return (
     <>
       <header className={styles.topbar}>
-        <Link href="/" className={styles.topLogo} aria-label="around 홈">
+        <Link href="/" className={styles.topLogo} aria-label="beside 홈">
           <Mark size={24} variant="tones" />
           <Wordmark className={styles.topWord} />
         </Link>

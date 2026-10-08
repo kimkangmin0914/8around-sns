@@ -2,8 +2,8 @@ import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/icons/icon";
 import styles from "./landing.module.css";
 
-const LINE_ONE = ["한", "줄의", "글이"];
-const LINE_TWO = ["대화가", "되는", "곳"];
+const LINE_ONE = ["앞면", "말고,"];
+const LINE_TWO = ["B면을", "들려줘요"];
 
 function Cursor({
   name,
@@ -56,22 +56,23 @@ export function Hero() {
       <span className={styles.peek} data-tone="zen" data-pos="right" />
       <span className={styles.peek} data-tone="gold" data-pos="bottom" />
       <div className={styles.heroInner}>
-        <p className="eyebrow">around · 곁에 있는 이야기</p>
+        <p className="eyebrow">beside · 텍스트로 나누는 B면</p>
         <h1 id="hero-title" className={styles.heroTitle}>
           <span className={styles.line}>
             {LINE_ONE.map((text) => word(text))}
           </span>
           <span className={styles.line}>
-            {LINE_TWO.map((text) => word(text, text === "대화가"))}
+            {LINE_TWO.map((text) => word(text, text === "B면을"))}
           </span>
         </h1>
         <p className={styles.heroLede}>
-          짧은 글을 올리고, 댓글과 답글로 이야기를 잇고, 곁에 두고 싶은 사람을
-          팔로우해요. 복잡한 기능 대신 대화에 집중한 작은 SNS예요.
+          잘 보이려고 다듬은 앞면 대신, 곁에 둔 사람들과 꾸밈없는 한 줄을
+          나눠요. 좋아요 수도, 피드를 섞는 알고리즘도 없어요. 시간순으로 흐르는
+          글과 대화뿐이에요.
         </p>
         <div className={styles.heroActions}>
           <ButtonLink href="/signup" size="l">
-            지금 시작하기
+            시작하기
             <Icon name="arrowRight" size={18} strokeWidth={2.2} />
           </ButtonLink>
           <ButtonLink href="/login" size="l" variant="secondary">
@@ -89,25 +90,25 @@ export function Hero() {
 /** Scroll-driven statement: words fill in as they pass through the viewport. */
 export function Statement() {
   const parts: (string | { tone: string })[] = [
-    "글",
-    "하나에",
+    "한",
+    "줄을",
+    "쓰면",
     { tone: "gold" },
     "댓글이",
-    "달리고,",
-    "댓글",
-    "아래로",
+    "붙고,",
+    "댓글은",
     { tone: "zen" },
-    "답글이",
+    "답글로",
     "이어지고,",
     "마음이",
     "맞으면",
     { tone: "orchid" },
-    "팔로우로",
-    "곁에",
-    "둬요.",
+    "서로의",
+    "곁이",
+    "돼요.",
   ];
   return (
-    <section className={styles.statement} aria-label="around가 움직이는 방식">
+    <section className={styles.statement} aria-label="beside가 움직이는 방식">
       <p className={styles.statementText}>
         {parts.map((part, i) =>
           typeof part === "string" ? (

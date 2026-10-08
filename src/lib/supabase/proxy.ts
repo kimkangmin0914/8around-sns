@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseConfig, serviceFetch } from "./config";
+import { hasAuthCookie, isMissingSession } from "./auth-session";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -24,7 +25,15 @@ export async function updateSession(request: NextRequest) {
         },
       },
     });
-    await supabase.auth.getUser();
+    const { error } = await supabase.auth.getUser();
+    // A cookie for a session or account that no longer exists: clear it so the
+    // browser recovers as a guest instead of failing on every page.
+    if (
+      error &&
+      isMissingSession(error) &&
+      hasAuthCookie(request.cookies.getAll().map((cookie) => cookie.name))
+    )
+      await supabase.auth.signOut({ scope: "local" });
   } catch {
     /* Pages show a service error; protected actions independently verify getUser(). */
   }

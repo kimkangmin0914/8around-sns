@@ -27,7 +27,7 @@ import styles from "./composer.module.css";
 const noopSubscribe = () => () => {};
 
 const draftKey = (userId: string, variant: string) =>
-  `around:draft:${variant}:${userId}`;
+  `beside:draft:${variant}:${userId}`;
 
 export function Composer({
   userId,
@@ -146,7 +146,7 @@ export function Composer({
             id={id}
             name="content"
             className={styles.input}
-            placeholder="무슨 이야기를 나눠볼까요?"
+            placeholder="지금 떠오른 한 줄"
             value={content}
             rows={variant === "dialog" ? 5 : 2}
             autoFocus={autoFocus}

@@ -11,7 +11,7 @@ export function sectionLabel(pathname: string) {
   if (pathname.startsWith("/signup")) return "Sign up";
   if (pathname.startsWith("/onboarding")) return "Welcome";
   if (pathname.startsWith("/brand")) return "Brand";
-  return "around";
+  return "beside";
 }
 
 export type NavItem = {

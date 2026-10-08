@@ -99,7 +99,7 @@ export function BentoMenu() {
     {
       slot: "a",
       label: "피드",
-      note: "지금 오가는 이야기",
+      note: "오늘의 B면",
       href: "/",
       art: <NodeArt />,
     },
@@ -121,7 +121,7 @@ export function BentoMenu() {
     {
       slot: "c",
       label: "사람들",
-      note: "곁에 둘 사람 찾기",
+      note: "곁에 둘 사람",
       href: "/people",
       art: (
         <span className={styles.markArt} aria-hidden="true">
@@ -166,7 +166,7 @@ export function BentoMenu() {
         }
       : {
           slot: "f",
-          label: "around란?",
+          label: "beside란?",
           note: "글 · 댓글 · 팔로우",
           href: "/#about",
           art: <CurveArt />,
@@ -196,7 +196,7 @@ export function BentoMenu() {
       : {
           slot: "g",
           label: "디자인 노트",
-          note: "around를 이루는 규칙",
+          note: "beside를 이루는 규칙",
           href: "/brand",
           art: <BigIcon name="grid" />,
         },

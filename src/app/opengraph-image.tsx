@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "around — every line becomes a conversation";
+export const alt = "beside — your B-side, beside you";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -33,10 +33,10 @@ export default function OpenGraphImage() {
     >
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ fontSize: 120, fontWeight: 800, letterSpacing: -6 }}>
-          around
+          beside
         </div>
         <div style={{ marginTop: 18, fontSize: 34, color: "#4F4A46" }}>
-          Every line becomes a conversation.
+          Your B-side, beside you.
         </div>
         <div style={{ marginTop: 40, fontSize: 26, color: "#0061FE" }}>
           Posts · Comments · Replies · Follows

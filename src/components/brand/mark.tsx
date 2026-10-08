@@ -82,7 +82,7 @@ export function Mark({
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span className={[styles.wordmark, className].filter(Boolean).join(" ")}>
-      around
+      beside
     </span>
   );
 }

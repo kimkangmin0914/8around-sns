@@ -170,7 +170,7 @@ export function OnboardingFlow({
       stepper={<Stepper step={2} />}
       eyebrow="프로필"
       title="어떻게 불러드릴까요?"
-      lede="가운데 빈자리가 채워지고 있어요. 이름과 주소는 다른 사람에게 보여요. 한 번 정하면 지금은 바꿀 수 없으니 천천히 정해 주세요."
+      lede="가운데 칸이 당신의 색으로 채워지고 있어요. 이름과 주소는 모두에게 보이고, 지금은 바꿀 수 없어요."
     >
       <form
         className={styles.form}
@@ -268,7 +268,7 @@ export function OnboardingFlow({
             bioLength > BIO_LIMIT
           }
         >
-          around 시작하기
+          시작하기
           <Icon name="arrowRight" size={18} strokeWidth={2.2} />
         </Button>
       </form>

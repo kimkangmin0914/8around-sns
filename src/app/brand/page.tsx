@@ -5,7 +5,7 @@ import styles from "./brand.module.css";
 
 export const metadata = {
   title: "디자인 노트",
-  description: "around를 이루는 마크, 색, 글자, 아이콘, 움직임의 규칙.",
+  description: "beside를 이루는 이름, 마크, 색, 글자, 목소리, 움직임의 규칙.",
 };
 
 const PAIRS: Record<(typeof TONES)[number], [string, string]> = {
@@ -46,6 +46,29 @@ const ICONS: IconName[] = [
   "external",
 ];
 
+const VOICE = [
+  {
+    rule: "한 문장에 하나만. 군더더기는 뽑아요.",
+    yes: "글을 올렸어요.",
+    no: "작성하신 게시글이 성공적으로 등록되었습니다.",
+  },
+  {
+    rule: "해요체로, 느낌표 없이.",
+    yes: "다시 만나서 반가워요.",
+    no: "환영합니다!! 다시 오셨군요!",
+  },
+  {
+    rule: "실패는 사실대로, 다음 행동과 함께.",
+    yes: "저장됐는지 확인하지 못했어요. 쓴 내용은 남겨 두었어요.",
+    no: "앗! 알 수 없는 오류가 발생했어요 😢",
+  },
+  {
+    rule: "B면 비유는 아껴서. 기능 이름은 늘 평범하게.",
+    yes: "오늘의 B면 · 팔로잉 · 답글",
+    no: "B면 트랙에 리플 남기기",
+  },
+];
+
 const MOTION = [
   {
     title: "바로 반응해요",
@@ -80,21 +103,47 @@ export default function BrandPage() {
             빈자리 하나
           </h1>
           <p className="page-lede">
-            around의 모든 화면은 하나의 생각에서 출발해요. 가운데는 비워 두고,
-            그 둘레에 사람들의 이야기를 놓는다. 이 페이지는 그 생각이 색과
-            글자와 움직임으로 옮겨진 규칙이에요.
+            beside의 모든 화면은 하나의 생각에서 출발해요. 가운데는 비워 두고,
+            그 둘레에 곁에 둔 사람들의 이야기를 놓는다. 이 페이지는 그 생각이
+            이름과 색, 글자와 목소리, 움직임으로 옮겨진 규칙이에요.
           </p>
+        </section>
+
+        <section className="section">
+          <span className="section-eyebrow eyebrow">이름</span>
+          <h2 className={styles.h2}>beside, 비사이드</h2>
+          <p className={styles.p}>
+            곁(beside)이라는 뜻과, 소리 내 읽으면 들리는 B면(B-side)을 함께
+            담았어요. 레코드의 B면은 덜 다듬어졌지만 더 솔직한 곡이 실리는
+            자리예요. 잘 보이려는 앞면은 다른 곳에 두고, 여기서는 곁에 둔
+            사람들과 꾸밈없는 한 줄을 나눠요.
+          </p>
+          <ul className={styles.nameFacts}>
+            <li>
+              <b>beside</b>
+              <span>곁에, 옆에. 둘레에 놓인 여덟 칸</span>
+            </li>
+            <li>
+              <b>B-side</b>
+              <span>보여주기용 앞면이 아닌 뒷면, 꾸밈없는 나</span>
+            </li>
+            <li>
+              <b>소문자</b>
+              <span>워드마크는 늘 소문자 beside</span>
+            </li>
+          </ul>
         </section>
 
         <section className="section">
           <span className="section-eyebrow eyebrow">마크</span>
           <div className={styles.split}>
             <div>
-              <h2 className={styles.h2}>8 around you</h2>
+              <h2 className={styles.h2}>Eight beside you</h2>
               <p className={styles.p}>
-                3×3 격자에서 가운데를 뺀 여덟 칸. 모서리 칸은 날카로운 모서리를
-                가운데로 향해요. 가운데 빈칸은 지금 화면을 보는 당신의 자리예요.
-                가입할 때 그 빈칸이 당신의 색으로 채워져요.
+                3×3 격자에서 가운데를 뺀 여덟 칸. 8around에서 온 모양이에요.
+                모서리 칸은 날카로운 모서리를 가운데로 향하고, 가운데 빈칸은
+                지금 화면을 보는 당신의 자리예요. 가입할 때 그 빈칸이 당신의
+                색으로 채워져요.
               </p>
               <div className={styles.markRow}>
                 <span className={styles.markChip}>
@@ -172,7 +221,7 @@ export default function BrandPage() {
             </div>
             <div className={styles.typeCard}>
               <p className={styles.typeMeta}>숫자 · 라틴 · 사용자 이름</p>
-              <p className={`${styles.typeLat} wide`}>@around 128</p>
+              <p className={`${styles.typeLat} wide`}>@beside 128</p>
               <p className={styles.typeName}>Archivo Expanded</p>
               <p className={styles.p}>
                 넓은 그로테스크로 숫자와 @이름을 또렷하게. 팔로워 수와 시간은
@@ -180,6 +229,26 @@ export default function BrandPage() {
               </p>
             </div>
           </div>
+        </section>
+
+        <section className="section">
+          <span className="section-eyebrow eyebrow">목소리</span>
+          <h2 className={styles.h2}>짧게, 사실대로, 다정하게</h2>
+          <ul className={styles.voice}>
+            {VOICE.map((item) => (
+              <li key={item.rule} className={styles.voiceItem}>
+                <p className={styles.voiceRule}>{item.rule}</p>
+                <p className={styles.voiceDo}>
+                  <span>이렇게</span>
+                  {item.yes}
+                </p>
+                <p className={styles.voiceDont}>
+                  <span>이렇게는 말고</span>
+                  {item.no}
+                </p>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section className="section">

@@ -220,7 +220,7 @@ export function ThreadList({
         ) : (
           <div className={styles.join}>
             <p>
-              <strong>대화에 참여하려면 로그인하세요.</strong>
+              <strong>로그인하면 대화에 낄 수 있어요.</strong>
               <span>댓글과 답글은 모두에게 보여요.</span>
             </p>
             <ButtonLink href={guestHref} size="s">

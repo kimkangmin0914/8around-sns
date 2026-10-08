@@ -60,7 +60,7 @@ export async function FeedAside({ viewer }: { viewer: ReadyViewer }) {
       </div>
       <div className="aside-block">
         <div className={styles.blockHead}>
-          <h2 className={styles.blockTitle}>곁에 둘 만한 사람</h2>
+          <h2 className={styles.blockTitle}>곁에 둘 사람</h2>
           <Link href="/people" className="link">
             모두 보기
           </Link>
@@ -69,8 +69,8 @@ export async function FeedAside({ viewer }: { viewer: ReadyViewer }) {
           <p className={styles.quiet}>추천을 불러오지 못했어요.</p>
         ) : suggestions.items.length === 0 ? (
           <p className={styles.quiet}>
-            지금 있는 사람들을 모두 팔로우하고 있어요. 새로운 사람이 오면 여기에
-            보여드릴게요.
+            지금 있는 사람을 모두 팔로우했어요. 새로운 사람이 오면 여기 보여
+            드릴게요.
           </p>
         ) : (
           <Suggestions initial={suggestions.items} />
@@ -98,7 +98,7 @@ export function SiteFoot({ shortcut = false }: { shortcut?: boolean }) {
           GitHub
         </a>
       </nav>
-      <p className={styles.copy}>around · 8around FDE 과제</p>
+      <p className={styles.copy}>beside · made for 8around</p>
     </footer>
   );
 }

@@ -117,10 +117,8 @@ export function CommentComposer({
           id={id}
           className={styles.composerInput}
           value={content}
-          rows={reply ? 2 : 2}
-          placeholder={
-            reply ? "답글을 남겨 주세요" : "이 글에 댓글을 남겨 보세요"
-          }
+          rows={2}
+          placeholder={reply ? "답글을 적어 보세요" : "생각을 덧붙여 보세요"}
           disabled={pending}
           aria-invalid={failure?.status === "input" || undefined}
           aria-describedby={`${id}-feedback`}

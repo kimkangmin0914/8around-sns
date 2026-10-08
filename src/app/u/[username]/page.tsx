@@ -33,8 +33,7 @@ export async function generateMetadata({
   if (!result.ok || !result.profile) return { title: "프로필" };
   return {
     title: `${result.profile.display_name} (@${username})`,
-    description:
-      result.profile.bio || `${result.profile.display_name}님의 around`,
+    description: result.profile.bio || `${result.profile.display_name}님의 B면`,
   };
 }
 
@@ -126,7 +125,7 @@ export default async function ProfilePage({
             )}
             <p className={styles.joined}>
               <Icon name="calendar" size={15} />
-              {joinedMonth(profile.created_at)}에 왔어요
+              {joinedMonth(profile.created_at)} 합류
             </p>
             <div className={styles.actions}>
               {self ? (

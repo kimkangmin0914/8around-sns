@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 /**
- * around icon set — 24px grid, 1.9px strokes, round joins.
+ * beside icon set — 24px grid, 1.9px strokes, round joins.
  * Shapes keep one sharp corner (the speech-bubble corner), echoing the tiles.
  */
 const PATHS = {
