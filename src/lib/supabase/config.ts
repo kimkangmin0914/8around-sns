@@ -1,3 +1,5 @@
+const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
+
 export function getSupabaseConfig() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -9,8 +11,12 @@ export function getSupabaseConfig() {
   } catch {
     throw new Error("Supabase URL is invalid.");
   }
+  // Plain HTTP is accepted only for the local Supabase CLI stack.
+  const secure =
+    parsed.protocol === "https:" ||
+    (parsed.protocol === "http:" && LOCAL_HOSTS.has(parsed.hostname));
   if (
-    parsed.protocol !== "https:" ||
+    !secure ||
     parsed.hostname === "your_project.supabase.co" ||
     parsed.username ||
     parsed.password

@@ -1,6 +1,9 @@
+# Netlify builds every push to `main` with the Next.js Runtime.
+# Lint, types and unit tests run in GitHub Actions; the build here only needs to compile.
 [build]
-  command = "npm run check && npm run build"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "24"
+  NEXT_TELEMETRY_DISABLED = "1"

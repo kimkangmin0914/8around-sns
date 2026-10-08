@@ -1,0 +1,233 @@
+/*
+ * around — design tokens
+ * Core: Blue / Coconut / Graphite. Accents: eight tone pairs (background + ink),
+ * one per tile of the "8 around" mark. Greys are warm, never blue-grey.
+ */
+:root {
+  color-scheme: light;
+
+  /* Core */
+  --c-blue: #0061fe;
+  --c-blue-deep: #0047bb;
+  --c-coconut: #f7f5f2;
+  --c-graphite: #1e1919;
+  --c-paper: #ffffff;
+
+  /* Semantic surfaces */
+  --bg: var(--c-coconut);
+  --surface: var(--c-paper);
+  --surface-sunk: #efece8;
+  --surface-hover: #f1eeea;
+  --ink: var(--c-graphite);
+  --ink-2: #4f4a46;
+  --ink-3: #67615a;
+  --ink-inverse: var(--c-coconut);
+  --line: #e2ded9;
+  --line-strong: #c7c1bb;
+  --grid: rgb(0 97 254 / 0.17);
+  --grid-strong: rgb(0 97 254 / 0.32);
+  --accent: var(--c-blue);
+  --accent-press: var(--c-blue-deep);
+  --accent-ink: #ffffff;
+  --accent-text: #0058e6;
+  --accent-wash: rgb(0 97 254 / 0.08);
+  --danger: #b0003a;
+  --danger-wash: #fde8ee;
+  --success: #175641;
+  --success-wash: #e7f3cf;
+  --focus: var(--c-blue);
+  --scrim: rgb(30 25 25 / 0.42);
+  --shadow-lift:
+    0 1px 0 rgb(30 25 25 / 0.04), 0 12px 32px -12px rgb(30 25 25 / 0.22);
+  --shadow-float:
+    0 2px 4px rgb(30 25 25 / 0.06), 0 24px 64px -16px rgb(30 25 25 / 0.32);
+
+  /* Tone pairs */
+  --tone-blue: #0061fe;
+  --tone-blue-ink: #ffffff;
+  --tone-blue-deep: #0047bb;
+  --tone-navy: #283750;
+  --tone-navy-ink: #b4c8e1;
+  --tone-navy-deep: #1a2438;
+  --tone-gold: #fad24b;
+  --tone-gold-ink: #684505;
+  --tone-gold-deep: #e9b92c;
+  --tone-zen: #3dd3ee;
+  --tone-zen-ink: #055463;
+  --tone-zen-deep: #14b3d2;
+  --tone-sunset: #fa551e;
+  --tone-sunset-ink: #4e0119;
+  --tone-sunset-deep: #dd3f0b;
+  --tone-lime: #b4dc19;
+  --tone-lime-ink: #175641;
+  --tone-lime-deep: #9cc20c;
+  --tone-crimson: #892055;
+  --tone-crimson-ink: #ffafa5;
+  --tone-crimson-deep: #6b1342;
+  --tone-orchid: #c8aff0;
+  --tone-orchid-ink: #682760;
+  --tone-orchid-deep: #b393e6;
+
+  /* Type */
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic",
+    sans-serif;
+  --font-wide: var(--font-archivo), var(--font-sans);
+  --text-xs: 0.75rem;
+  --text-s: 0.8125rem;
+  --text-m: 0.9375rem;
+  --text-base: 1rem;
+  --text-l: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  --text-display: clamp(2.75rem, 1.6rem + 5.2vw, 6rem);
+
+  /* Shape */
+  --r-xs: 4px;
+  --r-s: 8px;
+  --r-m: 12px;
+  --r-l: 20px;
+  --r-pill: 999px;
+  /* The signature: rounded everywhere except one sharp corner. */
+  --r-bubble: 16px 16px 16px 4px;
+  --r-tile: var(--r-m) var(--r-m) var(--r-m) var(--r-xs);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --t-fast: 140ms;
+  --t-med: 260ms;
+  --t-slow: 520ms;
+
+  /* Layout */
+  --rail: 76px;
+  --col-margin: 176px;
+  --col-main: 640px;
+  --col-aside: 328px;
+  --gutter: 32px;
+  --topbar: 56px;
+  --tabbar: 64px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #141312;
+    --surface: #1c1a19;
+    --surface-sunk: #0e0d0d;
+    --surface-hover: #242120;
+    --ink: #f7f5f2;
+    --ink-2: #d3cec9;
+    --ink-3: #a49b93;
+    --ink-inverse: #1e1919;
+    --line: #2d2a28;
+    --line-strong: #44403d;
+    --grid: rgb(92 156 255 / 0.17);
+    --grid-strong: rgb(92 156 255 / 0.34);
+    --accent: #2f7bff;
+    --accent-press: #5c97ff;
+    --accent-text: #7fb0ff;
+    --accent-wash: rgb(47 123 255 / 0.14);
+    --danger: #ff8fa8;
+    --danger-wash: #3a1420;
+    --success: #b4dc19;
+    --success-wash: #1d2a12;
+    --focus: #5c97ff;
+    --scrim: rgb(0 0 0 / 0.6);
+    --shadow-lift: 0 1px 0 rgb(0 0 0 / 0.3), 0 12px 32px -12px rgb(0 0 0 / 0.7);
+    --shadow-float:
+      0 2px 4px rgb(0 0 0 / 0.3), 0 24px 64px -16px rgb(0 0 0 / 0.8);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #141312;
+  --surface: #1c1a19;
+  --surface-sunk: #0e0d0d;
+  --surface-hover: #242120;
+  --ink: #f7f5f2;
+  --ink-2: #d3cec9;
+  --ink-3: #a49b93;
+  --ink-inverse: #1e1919;
+  --line: #2d2a28;
+  --line-strong: #44403d;
+  --grid: rgb(92 156 255 / 0.17);
+  --grid-strong: rgb(92 156 255 / 0.34);
+  --accent: #2f7bff;
+  --accent-press: #5c97ff;
+  --accent-text: #7fb0ff;
+  --accent-wash: rgb(47 123 255 / 0.14);
+  --danger: #ff8fa8;
+  --danger-wash: #3a1420;
+  --success: #b4dc19;
+  --success-wash: #1d2a12;
+  --focus: #5c97ff;
+  --scrim: rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 1px 0 rgb(0 0 0 / 0.3), 0 12px 32px -12px rgb(0 0 0 / 0.7);
+  --shadow-float:
+    0 2px 4px rgb(0 0 0 / 0.3), 0 24px 64px -16px rgb(0 0 0 / 0.8);
+}
+
+/* Any element can adopt a person's tone: data-tone="gold" etc. */
+[data-tone="blue"] {
+  --tone: var(--tone-blue);
+  --tone-ink: var(--tone-blue-ink);
+  --tone-deep: var(--tone-blue-deep);
+}
+[data-tone="navy"] {
+  --tone: var(--tone-navy);
+  --tone-ink: var(--tone-navy-ink);
+  --tone-deep: var(--tone-navy-deep);
+}
+[data-tone="gold"] {
+  --tone: var(--tone-gold);
+  --tone-ink: var(--tone-gold-ink);
+  --tone-deep: var(--tone-gold-deep);
+}
+[data-tone="zen"] {
+  --tone: var(--tone-zen);
+  --tone-ink: var(--tone-zen-ink);
+  --tone-deep: var(--tone-zen-deep);
+}
+[data-tone="sunset"] {
+  --tone: var(--tone-sunset);
+  --tone-ink: var(--tone-sunset-ink);
+  --tone-deep: var(--tone-sunset-deep);
+}
+[data-tone="lime"] {
+  --tone: var(--tone-lime);
+  --tone-ink: var(--tone-lime-ink);
+  --tone-deep: var(--tone-lime-deep);
+}
+[data-tone="crimson"] {
+  --tone: var(--tone-crimson);
+  --tone-ink: var(--tone-crimson-ink);
+  --tone-deep: var(--tone-crimson-deep);
+}
+[data-tone="orchid"] {
+  --tone: var(--tone-orchid);
+  --tone-ink: var(--tone-orchid-ink);
+  --tone-deep: var(--tone-orchid-deep);
+}
+
+@media (max-width: 1279px) {
+  :root {
+    --col-margin: 0px;
+  }
+}
+@media (max-width: 1023px) {
+  :root {
+    --col-aside: 0px;
+    --gutter: 24px;
+  }
+}
+@media (max-width: 759px) {
+  :root {
+    --rail: 0px;
+    --gutter: 16px;
+  }
+}

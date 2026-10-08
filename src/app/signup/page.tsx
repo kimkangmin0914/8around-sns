@@ -1,37 +1,25 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getViewer } from "@/lib/viewer";
-import { AuthForm } from "@/components/auth-form";
-import { ServiceError } from "@/components/service-error";
+import { getViewer } from "@/server/queries/viewer";
+import { AuthArt, AuthShell, Stepper } from "@/components/auth/auth-shell";
+import { AuthForm } from "@/components/auth/auth-form";
+import styles from "@/components/auth/auth.module.css";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "회원가입" };
 
-export default async function Signup() {
+export default async function SignupPage() {
   const viewer = await getViewer();
   if (viewer.status === "ready") redirect("/");
   if (viewer.status === "onboarding") redirect("/onboarding");
   return (
-    <section className="auth-panel surface stack">
-      <div>
-        <h1>회원가입</h1>
-      </div>
-      <p className="hint">
-        이메일 확인 메일을 보내지 않아 본인의 이메일인지 확인하지 않습니다.
-        이메일로 계정을 복구할 수도 없으니 이메일과 비밀번호를 정확히 입력해
-        주세요.
-      </p>
-      {viewer.status === "error" ? (
-        <ServiceError href="/signup" />
-      ) : (
-        <AuthForm mode="signup" />
-      )}
-      <p className="hint">
-        이미 계정이 있나요?{" "}
-        <Link className="text-link" href="/login">
-          로그인
-        </Link>
-      </p>
-    </section>
+    <AuthShell
+      art={<AuthArt center={<span className={styles.centerYou}>?</span>} />}
+      stepper={<Stepper step={1} />}
+      eyebrow="회원가입"
+      title="around에 자리를 만들어요"
+      lede="여덟 칸 가운데 비어 있는 자리, 거기가 당신의 자리예요. 먼저 로그인에 쓸 이메일과 비밀번호를 정해 주세요."
+    >
+      <AuthForm mode="signup" />
+    </AuthShell>
   );
 }

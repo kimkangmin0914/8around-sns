@@ -1,0 +1,108 @@
+.button {
+  --h: 40px;
+  position: relative;
+  display: inline-grid;
+  min-height: var(--h);
+  min-width: 104px;
+  padding: 0 16px;
+  border-radius: var(--r-s);
+  border: 1.5px solid transparent;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: var(--text-m);
+  font-weight: 680;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  transition:
+    background-color var(--t-fast) var(--ease-std),
+    border-color var(--t-fast) var(--ease-std),
+    color var(--t-fast) var(--ease-std),
+    transform var(--t-fast) var(--ease-std);
+}
+.button[data-size="s"] {
+  --h: 34px;
+  min-width: 88px;
+  padding: 0 12px;
+  font-size: var(--text-s);
+  border-radius: 7px;
+}
+.button:active {
+  transform: scale(0.97);
+}
+.button[data-pending] {
+  cursor: progress;
+}
+.button[data-following] {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+.button[data-variant="subtle"]:not([data-following]) {
+  background: transparent;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.button[data-variant="onTone"] {
+  background: var(--tone-ink);
+  color: var(--tone);
+}
+.button[data-variant="onTone"][data-following] {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--tone-ink) 55%, transparent);
+  color: var(--tone-ink);
+}
+
+.face {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+}
+.face > span {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    opacity var(--t-fast) var(--ease-std),
+    transform var(--t-med) var(--ease-out);
+}
+.face[data-pop] .on svg {
+  animation: pop 520ms var(--ease-spring);
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.4) rotate(-20deg);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+}
+.off {
+  opacity: 0;
+  transform: translateY(6px);
+}
+@media (hover: hover) {
+  .button:not([data-following]):hover {
+    background: var(--accent-press);
+  }
+  .button[data-variant="subtle"]:not([data-following]):hover {
+    background: var(--ink);
+    color: var(--ink-inverse);
+  }
+  .button[data-variant="onTone"]:not([data-following]):hover {
+    background: color-mix(in srgb, var(--tone-ink) 86%, var(--tone));
+  }
+  .button[data-following]:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: var(--danger-wash);
+  }
+  .button[data-following]:hover .on {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  .button[data-following]:hover .off {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,168 @@
+.field {
+  display: grid;
+  gap: 8px;
+}
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.label {
+  font-size: var(--text-s);
+  font-weight: 650;
+  color: var(--ink);
+}
+.optional {
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  border-radius: var(--r-s);
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
+  transition:
+    border-color var(--t-fast) var(--ease-std),
+    box-shadow var(--t-fast) var(--ease-std),
+    background-color var(--t-fast) var(--ease-std);
+}
+@media (hover: hover) {
+  .control:hover {
+    border-color: color-mix(in srgb, var(--ink) 45%, var(--line-strong));
+  }
+}
+.control:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-wash);
+}
+.control[data-invalid="true"] {
+  border-color: var(--danger);
+}
+.control[data-invalid="true"]:focus-within {
+  box-shadow: 0 0 0 4px var(--danger-wash);
+}
+.control[data-valid="true"] {
+  border-color: var(--success);
+}
+.lead {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  color: var(--ink-3);
+  flex: none;
+  transition: color var(--t-fast) var(--ease-std);
+}
+.control:focus-within .lead {
+  color: var(--accent-text);
+}
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  min-height: 49px;
+  padding: 0 14px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: var(--text-base);
+}
+.lead + .input {
+  padding-left: 0;
+}
+.input::placeholder {
+  color: var(--ink-3);
+  opacity: 0.85;
+}
+.input:disabled {
+  color: var(--ink-3);
+}
+.trail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 6px;
+}
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-s);
+  color: var(--ink-3);
+  transition:
+    color var(--t-fast) var(--ease-std),
+    background-color var(--t-fast) var(--ease-std);
+}
+@media (hover: hover) {
+  .toggle:hover {
+    color: var(--ink);
+    background: var(--surface-hover);
+  }
+}
+.hint,
+.error,
+.ok {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--text-s);
+  line-height: 1.45;
+}
+.hint {
+  color: var(--ink-3);
+}
+.error {
+  color: var(--danger);
+  animation: rise var(--t-med) var(--ease-out);
+}
+.ok {
+  color: var(--success);
+}
+.hint svg,
+.error svg,
+.ok svg {
+  margin-top: 1px;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 112px;
+  padding: 14px 16px;
+  border: 0;
+  outline: 0;
+  resize: none;
+  background: transparent;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  field-sizing: content;
+}
+.textarea::placeholder {
+  color: var(--ink-3);
+}
+
+.checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: var(--text-s);
+  color: var(--ink-3);
+}
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color var(--t-fast) var(--ease-std);
+}
+.check[data-met="true"] {
+  color: var(--success);
+}
+.check svg {
+  transition: transform var(--t-med) var(--ease-spring);
+}
+.check[data-met="true"] svg {
+  transform: scale(1.1);
+}

@@ -1,0 +1,267 @@
+.hero {
+  padding-top: 56px;
+  padding-bottom: 64px;
+}
+.heroMark {
+  margin-bottom: 36px;
+  animation: spin-in 1.2s var(--ease-spring) both;
+}
+@keyframes spin-in {
+  from {
+    transform: rotate(-45deg) scale(0.5);
+    opacity: 0;
+  }
+}
+.heroTitle {
+  font-size: var(--text-display);
+  font-weight: 820;
+  letter-spacing: -0.06em;
+  line-height: 1.02;
+}
+
+.h2 {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+.p {
+  max-width: 36em;
+  margin-top: 10px;
+  color: var(--ink-2);
+  line-height: 1.65;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 32px;
+}
+.markRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.markChip {
+  display: grid;
+  place-items: center;
+  min-width: 72px;
+  height: 72px;
+  padding: 0 18px;
+  border-radius: var(--r-tile);
+  border: 1px solid var(--grid-strong);
+  color: var(--ink);
+}
+.markChip[data-tone] {
+  background: var(--tone);
+  color: var(--tone-ink);
+  border-color: transparent;
+}
+.markChip:has([role="status"]) {
+  color: var(--accent);
+}
+.word {
+  font-size: 28px;
+}
+.markBig {
+  padding: 24px;
+}
+@media (hover: hover) {
+  .markBig:hover path {
+    transform: scale(0.82) rotate(90deg);
+  }
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 28px;
+  border-radius: var(--r-m) var(--r-m) var(--r-m) var(--r-xs);
+  overflow: hidden;
+}
+.swatch {
+  position: relative;
+  display: grid;
+  align-content: space-between;
+  min-height: 176px;
+  padding: 16px 18px;
+  overflow: hidden;
+  background: var(--tone);
+  color: var(--tone-ink);
+  animation: rise var(--t-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i) * 50ms);
+  transition: background-color 350ms var(--ease-std);
+}
+.swatchName {
+  font-size: var(--text-l);
+  font-weight: 780;
+  letter-spacing: -0.03em;
+}
+.swatchHex {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-wide);
+  font-variation-settings: "wdth" 110;
+  font-size: var(--text-xs);
+  font-weight: 650;
+  line-height: 1.5;
+}
+.swatchAa {
+  position: absolute;
+  right: 12px;
+  bottom: -6px;
+  font-family: var(--font-wide);
+  font-variation-settings: "wdth" 112;
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  transition: transform 450ms var(--ease-spring);
+}
+@media (hover: hover) {
+  .swatch:hover {
+    background: var(--tone-deep);
+  }
+  .swatch:hover .swatchAa {
+    transform: translate(-4px, -6px) rotate(-6deg);
+  }
+}
+.core {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 18px;
+  font-family: var(--font-wide);
+  font-variation-settings: "wdth" 108;
+  font-size: var(--text-s);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.core li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.core span {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px 5px 5px 2px;
+  border: 1px solid var(--line-strong);
+}
+
+.typeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.typeCard {
+  padding: 24px;
+  border-radius: var(--r-m) var(--r-m) var(--r-m) var(--r-xs);
+  border: 1px solid var(--grid-strong);
+}
+.typeMeta {
+  color: var(--accent-text);
+  font-size: var(--text-s);
+  font-weight: 650;
+}
+.typeKo {
+  margin-top: 18px;
+  font-size: clamp(2.75rem, 1.5rem + 3vw, 4.5rem);
+  font-weight: 820;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+.typeLat {
+  margin-top: 18px;
+  font-size: clamp(2.5rem, 1.2rem + 3vw, 4rem);
+  font-weight: 800;
+  line-height: 1;
+}
+.typeName {
+  margin-top: 16px;
+  font-weight: 720;
+}
+
+.icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  margin-top: 24px;
+  border-top: 1px solid var(--grid);
+  border-left: 1px solid var(--grid);
+}
+.icon {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 22px 8px 14px;
+  border-right: 1px solid var(--grid);
+  border-bottom: 1px solid var(--grid);
+  color: var(--ink);
+  transition:
+    background-color var(--t-fast) var(--ease-std),
+    color var(--t-fast) var(--ease-std);
+}
+.icon svg {
+  transition: transform var(--t-med) var(--ease-spring);
+}
+.icon span {
+  color: var(--accent-text);
+  font-family: var(--font-wide);
+  font-variation-settings: "wdth" 108;
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+@media (hover: hover) {
+  .icon:hover {
+    background: var(--accent-wash);
+  }
+  .icon:hover svg {
+    transform: scale(1.18) rotate(-8deg);
+  }
+}
+
+.motion {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 24px;
+  padding: 0;
+  list-style: none;
+}
+.motionItem {
+  padding: 22px 24px 26px;
+  border-radius: var(--r-m) var(--r-m) var(--r-m) var(--r-xs);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.motionNum {
+  color: var(--accent-text);
+  font-size: var(--text-s);
+  font-weight: 700;
+}
+.motionTitle {
+  margin-top: 10px;
+  font-size: var(--text-xl);
+  font-weight: 780;
+  letter-spacing: -0.035em;
+}
+
+@media (max-width: 1023px) {
+  .swatches {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .split {
+    grid-template-columns: 1fr;
+  }
+  .markBig {
+    display: none;
+  }
+}
+@media (max-width: 759px) {
+  .typeGrid,
+  .motion {
+    grid-template-columns: 1fr;
+  }
+}

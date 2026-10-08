@@ -1,0 +1,38 @@
+.wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 28px var(--gutter);
+}
+.wrap::before,
+.end::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  right: -100vw;
+  height: 1px;
+  background: var(--grid);
+}
+.error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--danger);
+  font-size: var(--text-m);
+  font-weight: 600;
+}
+.end {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 36px var(--gutter) 12px;
+  color: var(--ink-3);
+  font-size: var(--text-s);
+  font-weight: 560;
+}
+.end svg {
+  color: var(--line-strong);
+}

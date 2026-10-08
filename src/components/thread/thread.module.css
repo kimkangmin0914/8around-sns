@@ -1,0 +1,317 @@
+.threads {
+  --thread-line: var(--line-strong);
+  position: relative;
+}
+
+/* ───────── Composer ───────── */
+.rootComposer {
+  position: relative;
+  padding: 20px var(--gutter);
+}
+.composer {
+  display: flex;
+  gap: 12px;
+  animation: rise var(--t-med) var(--ease-out);
+}
+.composer[data-reply] {
+  padding: 10px 0 14px;
+}
+.composerBody {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+.replyingTo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-3);
+  font-size: var(--text-s);
+}
+.replyingTo strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.composerInput {
+  width: 100%;
+  min-height: 52px;
+  max-height: 40vh;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 14px 14px 14px 4px;
+  background: var(--surface);
+  resize: none;
+  outline: none;
+  line-height: 1.55;
+  field-sizing: content;
+  transition:
+    border-color var(--t-fast) var(--ease-std),
+    box-shadow var(--t-fast) var(--ease-std);
+}
+.composerInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-wash);
+}
+.composerInput[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+.composerInput::placeholder {
+  color: var(--ink-3);
+}
+.composerError {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--danger);
+  font-size: var(--text-s);
+  font-weight: 560;
+  animation: rise var(--t-med) var(--ease-out);
+}
+.composerError svg {
+  margin-top: 2px;
+}
+.composerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.composerActions {
+  display: flex;
+  gap: 6px;
+}
+
+.join {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: var(--r-m) var(--r-m) var(--r-m) var(--r-xs);
+  background: var(--surface);
+  border: 1.5px dashed var(--line-strong);
+}
+.join p {
+  display: grid;
+  gap: 2px;
+}
+.join p span {
+  color: var(--ink-3);
+  font-size: var(--text-s);
+}
+
+/* ───────── Threads ───────── */
+.list {
+  position: relative;
+}
+.thread {
+  position: relative;
+  padding: 6px var(--gutter) 10px;
+}
+.thread::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  right: -100vw;
+  height: 1px;
+  background: var(--grid);
+}
+
+.comment {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 14px 10px 8px;
+  margin: 0 -10px;
+  border-radius: var(--r-m);
+}
+.comment[data-fresh] {
+  animation: flash 2.6s var(--ease-std) 200ms;
+}
+.comment[data-depth="1"] {
+  padding-top: 10px;
+}
+.avatar {
+  align-self: flex-start;
+}
+@media (hover: hover) {
+  .avatar:hover > span {
+    border-radius: 50%;
+  }
+}
+.commentMain {
+  flex: 1;
+  min-width: 0;
+}
+.commentHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 6px;
+  line-height: 1.35;
+}
+.name {
+  font-weight: 720;
+  font-size: var(--text-m);
+  letter-spacing: -0.02em;
+}
+@media (hover: hover) {
+  a.name:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+  }
+}
+.handle {
+  color: var(--ink-3);
+  font-size: var(--text-s);
+  font-family: var(--font-wide);
+  font-variation-settings: "wdth" 108;
+}
+.meta {
+  color: var(--ink-3);
+  font-size: var(--text-s);
+}
+.body {
+  margin-top: 3px;
+  font-size: var(--text-m);
+  line-height: 1.6;
+}
+.commentFoot {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0 0 -8px;
+}
+.replyButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 8px;
+  border-radius: var(--r-s);
+  color: var(--ink-3);
+  font-size: var(--text-s);
+  font-weight: 650;
+  transition:
+    background-color var(--t-fast) var(--ease-std),
+    color var(--t-fast) var(--ease-std);
+}
+@media (hover: hover) {
+  .replyButton:hover {
+    background: var(--accent-wash);
+    color: var(--accent-text);
+  }
+}
+
+/* Root avatar → replies: a continuous line with rounded elbows. */
+.thread:has(.replies) > .comment[data-depth="0"]::after {
+  content: "";
+  position: absolute;
+  left: 29px;
+  top: 62px;
+  bottom: -2px;
+  border-left: 2px solid var(--thread-line);
+}
+.replies {
+  position: relative;
+  margin-left: 20px;
+  padding-left: 30px;
+}
+.replies > ol > li,
+.replies > .toggle,
+.replies > form {
+  position: relative;
+}
+.replies > ol > li::before,
+.replies > .toggle::before,
+.replies > form::before {
+  content: "";
+  position: absolute;
+  left: -31px;
+  top: 0;
+  width: 27px;
+  height: 27px;
+  border-left: 2px solid var(--thread-line);
+  border-bottom: 2px solid var(--thread-line);
+  border-bottom-left-radius: 12px;
+}
+.replies > .toggle::before {
+  height: 50%;
+}
+.replies > form::before {
+  height: 26px;
+}
+.replies > ol > li::after,
+.replies > .toggle::after {
+  content: "";
+  position: absolute;
+  left: -31px;
+  top: 25px;
+  bottom: 0;
+  border-left: 2px solid var(--thread-line);
+}
+.replies > .toggle::after {
+  top: 50%;
+}
+.replies > ol:last-child > li:last-child::after,
+.replies > .toggle:last-child::after {
+  display: none;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 8px 0 4px;
+  border-radius: var(--r-s);
+  color: var(--accent-text);
+  font-size: var(--text-s);
+  font-weight: 700;
+}
+.toggle svg {
+  transition: transform var(--t-med) var(--ease-out);
+}
+.toggleLine {
+  display: none;
+}
+@media (hover: hover) {
+  .toggle:hover {
+    background: var(--accent-wash);
+  }
+}
+
+.none {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 28px var(--gutter) 36px;
+  color: var(--ink-3);
+}
+.none::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  right: -100vw;
+  height: 1px;
+  background: var(--grid);
+}
+
+@media (max-width: 759px) {
+  .replies {
+    padding-left: 24px;
+  }
+  .replies > ol > li::before,
+  .replies > .toggle::before,
+  .replies > form::before,
+  .replies > ol > li::after,
+  .replies > .toggle::after {
+    left: -25px;
+    width: 21px;
+  }
+}

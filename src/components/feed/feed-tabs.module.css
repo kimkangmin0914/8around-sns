@@ -1,0 +1,39 @@
+/* Dropbox-style folder tabs sitting on the next grid line. */
+.tabs {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  padding: 0 var(--gutter);
+  margin-top: -1px;
+}
+.tab {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 108px;
+  height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--grid-strong);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  color: var(--ink-3);
+  font-weight: 680;
+  font-size: var(--text-m);
+  transition:
+    background-color var(--t-fast) var(--ease-std),
+    color var(--t-fast) var(--ease-std);
+}
+.tab[aria-current="page"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ink-inverse);
+}
+@media (hover: hover) {
+  .tab:not([aria-current="page"]):hover {
+    background: var(--surface-hover);
+    color: var(--ink);
+  }
+}
+.tabs + * {
+  margin-top: 0;
+}

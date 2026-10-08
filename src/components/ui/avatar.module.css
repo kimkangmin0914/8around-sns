@@ -1,0 +1,20 @@
+.avatar {
+  --size: 44px;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--size);
+  height: var(--size);
+  border-radius: calc(var(--size) * 0.3) calc(var(--size) * 0.3)
+    calc(var(--size) * 0.3) calc(var(--size) * 0.08);
+  background: var(--tone);
+  color: var(--tone-ink);
+  font-size: calc(var(--size) * 0.42);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  user-select: none;
+  transition:
+    border-radius var(--t-med) var(--ease-out),
+    transform var(--t-med) var(--ease-spring);
+}

@@ -14,3 +14,7 @@ playwright-report/
 *auth-state*.json
 *.log
 .DS_Store
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/

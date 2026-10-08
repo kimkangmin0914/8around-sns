@@ -1,36 +1,40 @@
 import { redirect } from "next/navigation";
-import { getViewer } from "@/lib/viewer";
-import { ProfileForm } from "@/components/profile-form";
-import { SessionBoundary } from "@/components/session-boundary";
-import { ServiceError } from "@/components/service-error";
+import { getViewer } from "@/server/queries/viewer";
+import { OnboardingFlow } from "@/components/auth/onboarding-flow";
+import { ErrorState } from "@/components/ui/empty-state";
+import { ButtonLink } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "공개 프로필 설정" };
+export const metadata = { title: "프로필 만들기" };
 
-export default async function Onboarding() {
+/** Suggest a handle from the e-mail's local part, if it fits the rules. */
+function suggestFrom(email: string | null) {
+  const local = (email ?? "").split("@")[0]?.toLowerCase() ?? "";
+  const cleaned = local.replace(/[^a-z0-9_]/g, "_").replace(/_+/g, "_");
+  const trimmed = cleaned.replace(/^_+|_+$/g, "").slice(0, 20);
+  return /^[a-z0-9_]{3,20}$/.test(trimmed) ? trimmed : "";
+}
+
+export default async function OnboardingPage() {
   const viewer = await getViewer();
   if (viewer.status === "guest") redirect("/login");
   if (viewer.status === "ready") redirect("/");
+  if (viewer.status === "error")
+    return (
+      <div className="page">
+        <div className="page-main">
+          <ErrorState
+            title="계정을 확인하지 못했어요"
+            action={
+              <ButtonLink href="/onboarding" variant="secondary">
+                다시 시도
+              </ButtonLink>
+            }
+          />
+        </div>
+      </div>
+    );
   return (
-    <section className="auth-panel surface stack">
-      <header className="page-heading">
-        <h1>공개 프로필 설정</h1>
-      </header>
-      <p className="muted">가입한 계정으로 공개 프로필만 설정하면 됩니다.</p>
-      {viewer.status === "error" ? (
-        <ServiceError
-          message="프로필을 확인하지 못했습니다."
-          href="/onboarding"
-        />
-      ) : (
-        <SessionBoundary
-          key={viewer.id}
-          userId={viewer.id}
-          generation={crypto.randomUUID()}
-        >
-          <ProfileForm userId={viewer.id} />
-        </SessionBoundary>
-      )}
-    </section>
+    <OnboardingFlow userId={viewer.id} suggestion={suggestFrom(viewer.email)} />
   );
 }

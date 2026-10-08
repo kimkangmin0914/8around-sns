@@ -1,0 +1,193 @@
+/*
+ * The visible grid. Columns: margin (eyebrow labels) | main | aside.
+ * Vertical hairlines are painted by .page; horizontal ones by each .section.
+ */
+.frame {
+  margin-left: var(--rail);
+  min-height: 100dvh;
+}
+
+.page {
+  --main-w: var(--col-main);
+  display: grid;
+  grid-template-columns: var(--col-margin) var(--main-w) var(--col-aside);
+  align-items: start;
+  width: calc(var(--col-margin) + var(--main-w) + var(--col-aside) + 1px);
+  max-width: 100%;
+  min-height: 100dvh;
+  margin-inline: auto;
+  background-image:
+    linear-gradient(var(--grid), var(--grid)),
+    linear-gradient(var(--grid), var(--grid)),
+    linear-gradient(var(--grid), var(--grid)),
+    linear-gradient(var(--grid), var(--grid));
+  background-size: 1px 100%;
+  background-repeat: no-repeat;
+  background-position:
+    0 0,
+    var(--col-margin) 0,
+    calc(var(--col-margin) + var(--main-w)) 0,
+    100% 0;
+}
+.page-full {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.page-main {
+  grid-column: 2;
+  min-width: 0;
+  padding-bottom: 96px;
+}
+.page-aside {
+  grid-column: 3;
+  position: sticky;
+  top: 0;
+  min-width: 0;
+  max-height: 100dvh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.page-aside::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .page {
+    --main-w: 100%;
+    grid-template-columns: 100%;
+    width: min(720px, 100%);
+  }
+  .page-main,
+  .page-full {
+    grid-column: 1;
+  }
+  .page-aside {
+    display: none;
+  }
+}
+@media (max-width: 759px) {
+  .page {
+    background: none;
+    width: 100%;
+  }
+  .page-main {
+    padding-bottom: calc(var(--tabbar) + 48px + env(safe-area-inset-bottom));
+  }
+}
+
+.section {
+  position: relative;
+  padding: 40px var(--gutter);
+}
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  right: -100vw;
+  height: 1px;
+  background: var(--grid);
+  pointer-events: none;
+}
+.section[data-tight] {
+  padding-block: 24px;
+}
+.section[data-flush] {
+  padding: 0;
+}
+.section-eyebrow {
+  display: block;
+  margin-bottom: 14px;
+}
+@media (min-width: 1280px) {
+  .section-eyebrow {
+    position: absolute;
+    top: 43px;
+    right: 100%;
+    width: var(--col-margin);
+    margin: 0;
+    padding-right: 20px;
+    text-align: right;
+  }
+  .section[data-tight] .section-eyebrow {
+    top: 27px;
+  }
+}
+
+.aside-block {
+  position: relative;
+  padding: 28px 24px;
+}
+.aside-block + .aside-block::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--grid);
+}
+
+.page-title {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+.page-lede {
+  margin-top: 14px;
+  max-width: 34em;
+  color: var(--ink-2);
+  font-size: var(--text-l);
+  line-height: 1.55;
+}
+
+/* Main + aside together, for wide content such as the people wall. */
+.page-wide {
+  grid-column: 2 / -1;
+  min-width: 0;
+  padding-bottom: 96px;
+}
+@media (max-width: 1023px) {
+  .page-wide {
+    grid-column: 1;
+  }
+}
+@media (max-width: 759px) {
+  .page-wide {
+    padding-bottom: calc(var(--tabbar) + 48px + env(safe-area-inset-bottom));
+  }
+}
+
+.people-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 8px;
+  margin: 0 var(--gutter);
+  border-radius: var(--r-m) var(--r-m) var(--r-m) var(--r-xs);
+  overflow: hidden;
+}
+@media (max-width: 759px) {
+  .people-tiles {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+}
+@media (max-width: 400px) {
+  .people-tiles {
+    grid-template-columns: 1fr;
+  }
+}
+
+main:focus {
+  outline: none;
+}
+
+/* Wide pages merge main + aside, so the line between them is dropped. */
+.page:has(> .page-wide) {
+  background-size:
+    1px 100%,
+    1px 100%,
+    0 0,
+    1px 100%;
+}

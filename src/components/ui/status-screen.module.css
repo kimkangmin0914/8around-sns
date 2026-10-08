@@ -1,0 +1,78 @@
+.screen {
+  position: relative;
+  padding: 56px var(--gutter) 80px;
+}
+.screen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  right: -100vw;
+  height: 1px;
+  background: var(--grid);
+}
+.art {
+  position: relative;
+  height: 260px;
+  margin-bottom: 36px;
+  overflow: hidden;
+  border-radius: var(--r-l) var(--r-l) var(--r-l) var(--r-xs);
+  background: var(--tone);
+  color: var(--tone-ink);
+  animation: hero-in 700ms var(--ease-out) both;
+}
+@keyframes hero-in {
+  from {
+    clip-path: inset(0 0 100% 0 round var(--r-l));
+  }
+}
+.code {
+  position: absolute;
+  left: 24px;
+  bottom: -14px;
+  font-family: var(--font-wide);
+  font-variation-settings: "wdth" 125;
+  font-size: clamp(6rem, 4rem + 8vw, 10rem);
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.07em;
+}
+.mark {
+  position: absolute;
+  right: 28px;
+  top: 28px;
+  animation: spin-in 1.1s var(--ease-spring) 200ms both;
+}
+@keyframes spin-in {
+  from {
+    transform: rotate(-90deg) scale(0.4);
+    opacity: 0;
+  }
+}
+.title {
+  font-size: var(--text-3xl);
+  font-weight: 820;
+  letter-spacing: -0.05em;
+}
+.body {
+  max-width: 30em;
+  margin-top: 12px;
+  color: var(--ink-2);
+  font-size: var(--text-l);
+  line-height: 1.6;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+@media (max-width: 759px) {
+  .art {
+    height: 200px;
+  }
+  .mark svg {
+    width: 80px;
+    height: 80px;
+  }
+}

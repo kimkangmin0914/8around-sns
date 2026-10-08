@@ -1,0 +1,120 @@
+.button {
+  --h: 44px;
+  --px: 18px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--h);
+  padding: 0 var(--px);
+  border-radius: var(--r-s);
+  border: 1.5px solid transparent;
+  font-size: var(--text-m);
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: -0.015em;
+  user-select: none;
+  transition:
+    background-color var(--t-fast) var(--ease-std),
+    border-color var(--t-fast) var(--ease-std),
+    color var(--t-fast) var(--ease-std),
+    transform var(--t-fast) var(--ease-std),
+    box-shadow var(--t-fast) var(--ease-std);
+}
+.button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+}
+.button[aria-disabled="true"],
+.button:disabled {
+  opacity: 0.55;
+}
+.button[data-busy="true"] {
+  opacity: 1;
+  cursor: progress;
+}
+
+.s {
+  --h: 34px;
+  --px: 12px;
+  font-size: var(--text-s);
+  border-radius: 7px;
+}
+.l {
+  --h: 54px;
+  --px: 24px;
+  font-size: var(--text-base);
+  border-radius: var(--r-m) var(--r-m) var(--r-m) var(--r-xs);
+}
+.block {
+  width: 100%;
+}
+.icon {
+  --px: 0;
+  width: var(--h);
+}
+
+.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.secondary {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.ghost {
+  color: var(--ink-2);
+}
+.tone {
+  background: var(--tone-ink);
+  color: var(--tone);
+}
+.toneOutline {
+  border-color: color-mix(in srgb, var(--tone-ink) 55%, transparent);
+  color: var(--tone-ink);
+}
+.danger {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
+@media (hover: hover) {
+  .primary:hover:not(:disabled) {
+    background: var(--accent-press);
+  }
+  .secondary:hover:not(:disabled) {
+    background: var(--ink);
+    color: var(--ink-inverse);
+  }
+  .ghost:hover:not(:disabled) {
+    background: var(--surface-hover);
+    color: var(--ink);
+  }
+  .tone:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--tone-ink) 86%, var(--tone));
+  }
+  .toneOutline:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--tone-ink) 12%, transparent);
+    border-color: var(--tone-ink);
+  }
+  .danger:hover:not(:disabled) {
+    background: var(--danger-wash);
+  }
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity var(--t-fast) var(--ease-std);
+}
+[data-busy="true"] > .label {
+  opacity: 0;
+}
+.spinner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}

@@ -1,0 +1,61 @@
+.mark {
+  overflow: visible;
+}
+
+.tile {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tones .tile {
+  fill: var(--tone);
+  transition:
+    transform var(--t-med) var(--ease-spring),
+    fill var(--t-med) var(--ease-std);
+  transition-delay: calc(var(--i) * 18ms);
+}
+
+.loader .tile {
+  animation: chase 1.2s var(--ease-std) infinite;
+  animation-delay: calc(var(--i) * 0.15s);
+  opacity: 0.18;
+}
+
+@keyframes chase {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.82);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  40% {
+    opacity: 0.18;
+    transform: scale(0.82);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader .tile {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+.loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.wordmark {
+  font-family: var(--font-wide);
+  font-variation-settings: "wdth" 125;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}

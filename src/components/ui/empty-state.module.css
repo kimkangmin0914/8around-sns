@@ -1,0 +1,49 @@
+.empty {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 48px var(--gutter) 56px;
+}
+.empty::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  right: -100vw;
+  height: 1px;
+  background: var(--grid);
+}
+.art {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 8px;
+  border-radius: 20px 20px 20px 5px;
+  background: var(--tone);
+  color: var(--tone-ink);
+  animation: wobble 900ms var(--ease-spring) both;
+}
+@keyframes wobble {
+  from {
+    transform: rotate(-12deg) scale(0.6);
+    opacity: 0;
+  }
+}
+.title {
+  font-size: var(--text-xl);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+.body {
+  max-width: 30em;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}

@@ -1,171 +1,262 @@
-import { Avatar } from "@/components/avatar";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getViewer } from "@/lib/viewer";
-import { readProfile, readFollowing, readConnections } from "@/lib/people";
-import { readPosts } from "@/lib/posts";
-import { PAGE_SIZE, validateOffset } from "@/lib/validation";
-import { FollowButton } from "@/components/follow-button";
-import { PersonRow } from "@/components/person-row";
-import { PostRow } from "@/components/post-row";
-import { SessionBoundary } from "@/components/session-boundary";
-import { ServiceError } from "@/components/service-error";
+import { getViewer } from "@/server/queries/viewer";
+import { getProfile, listConnections } from "@/server/queries/people";
+import { listPosts } from "@/server/queries/posts";
+import { USERNAME_PATTERN, parseTab } from "@/lib/validation";
+import { initialOf, toneFor } from "@/lib/tone";
+import { joinedMonth } from "@/lib/time";
+import { FeedList } from "@/components/feed/feed-list";
+import { PeopleList } from "@/components/people/people-list";
+import { FollowButton } from "@/components/people/follow-button";
+import { ComposeButton } from "@/components/shell/compose-button";
+import { SiteFoot } from "@/components/feed/aside";
+import { EmptyState, ErrorState } from "@/components/ui/empty-state";
+import { ButtonLink } from "@/components/ui/button";
+import { Icon } from "@/components/icons/icon";
+import styles from "./profile.module.css";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "프로필" };
+
+type Params = Promise<{ username: string }>;
+type Search = Promise<{ tab?: string | string[] }>;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Params;
+}): Promise<Metadata> {
+  const { username } = await params;
+  if (!USERNAME_PATTERN.test(username)) return { title: "프로필" };
+  const result = await getProfile(username, null);
+  if (!result.ok || !result.profile) return { title: "프로필" };
+  return {
+    title: `${result.profile.display_name} (@${username})`,
+    description:
+      result.profile.bio || `${result.profile.display_name}님의 around`,
+  };
+}
+
+const TABS = ["posts", "followers", "following"] as const;
 
 export default async function ProfilePage({
   params,
   searchParams,
 }: {
-  params: Promise<{ username: string }>;
-  searchParams: Promise<{
-    tab?: string | string[];
-    offset?: string | string[];
-  }>;
+  params: Params;
+  searchParams: Search;
 }) {
   const { username } = await params;
-  if (!/^[a-z0-9_]{3,20}$/.test(username)) notFound();
-  const query = await searchParams;
-  const tab = query.tab ?? "posts";
-  const offset = validateOffset(query.offset);
+  if (!USERNAME_PATTERN.test(username)) notFound();
+  const tab = parseTab((await searchParams).tab, TABS, "posts");
   const href = `/u/${username}`;
-  if (
-    offset === null ||
-    (tab !== "posts" && tab !== "followers" && tab !== "following")
-  )
-    return <ServiceError message="목록 주소를 확인해 주세요." href={href} />;
-  const [result, viewer] = await Promise.all([
-    readProfile(username),
-    getViewer(),
-  ]);
+  const viewer = await getViewer();
+  const viewerId = viewer.status === "ready" ? viewer.id : null;
+  const result = await getProfile(username, viewerId);
   if (!result.ok)
-    return <ServiceError message="프로필을 불러오지 못했습니다." href={href} />;
-  if (!result.profile) notFound();
-  const profile = result.profile;
-  const relationship =
-    viewer.status === "ready" && viewer.id !== profile.id
-      ? await readFollowing(viewer.id, profile.id)
-      : null;
-  const posts = tab === "posts" ? await readPosts(offset, profile.id) : null;
-  const connections =
-    tab !== "posts" ? await readConnections(profile.id, tab, offset) : null;
-  const hasMore =
-    (posts?.ok && posts.hasMore) || (connections?.ok && connections.hasMore);
-  return (
-    <>
-      <header className="page-heading">
-        <h1>프로필</h1>
-      </header>
-      <section className="profile-header stack" aria-label="사용자 소개">
-        <div className="profile-identity">
-          <Avatar name={profile.display_name} />
-          <div className="person-copy">
-            <h2>{profile.display_name}</h2>
-            <p className="post-meta">@{profile.username}</p>
-          </div>
+    return (
+      <div className="page">
+        <div className="page-main">
+          <ErrorState
+            title="프로필을 불러오지 못했어요"
+            action={
+              <ButtonLink href={href} variant="secondary">
+                <Icon name="refresh" size={18} /> 다시 불러오기
+              </ButtonLink>
+            }
+          />
         </div>
-        {profile.bio && <p className="post-body muted">{profile.bio}</p>}
-        {viewer.status === "ready" &&
-          relationship &&
-          (relationship.ok ? (
-            <SessionBoundary
-              key={viewer.id}
-              userId={viewer.id}
-              generation={crypto.randomUUID()}
+      </div>
+    );
+  const profile = result.profile;
+  if (!profile) notFound();
+  const activeTab = tab ?? "posts";
+  const self = profile.relation?.self ?? false;
+  const relation = profile.relation;
+
+  const [posts, people] = await Promise.all([
+    activeTab === "posts"
+      ? listPosts({ kind: "author", authorId: profile.id })
+      : null,
+    activeTab !== "posts"
+      ? listConnections(profile.id, activeTab, viewerId)
+      : null,
+  ]);
+
+  const tabs = [
+    { key: "posts", label: "글", count: profile.counts.posts, href },
+    {
+      key: "followers",
+      label: "팔로워",
+      count: profile.counts.followers,
+      href: `${href}?tab=followers`,
+    },
+    {
+      key: "following",
+      label: "팔로잉",
+      count: profile.counts.following,
+      href: `${href}?tab=following`,
+    },
+  ] as const;
+
+  return (
+    <div className="page">
+      <div className="page-main">
+        <section className="section" data-tight>
+          <span className="section-eyebrow eyebrow">프로필</span>
+          <div className={styles.hero} data-tone={toneFor(profile.id)}>
+            <div className={styles.badges}>
+              {self && <span className={styles.badge}>내 프로필</span>}
+              {relation?.followsYou && !self && (
+                <span className={styles.badge}>
+                  <Icon name="following" size={14} strokeWidth={2.2} />
+                  나를 팔로우해요
+                </span>
+              )}
+            </div>
+            <h1 className={styles.name}>{profile.display_name}</h1>
+            <p className={styles.handle}>@{profile.username}</p>
+            {profile.bio ? (
+              <p className={styles.bio}>{profile.bio}</p>
+            ) : (
+              <p className={styles.bio} data-empty>
+                {self ? "아직 소개가 없어요." : "소개가 아직 없어요."}
+              </p>
+            )}
+            <p className={styles.joined}>
+              <Icon name="calendar" size={15} />
+              {joinedMonth(profile.created_at)}에 왔어요
+            </p>
+            <div className={styles.actions}>
+              {self ? (
+                <ComposeButton variant="tone" size="m" />
+              ) : (
+                <FollowButton
+                  targetId={profile.id}
+                  targetName={profile.display_name}
+                  following={relation?.following ?? false}
+                  followsYou={relation?.followsYou ?? false}
+                  variant="onTone"
+                />
+              )}
+            </div>
+            <span className={styles.initial} aria-hidden="true">
+              {initialOf(profile.display_name)}
+            </span>
+          </div>
+        </section>
+        <nav
+          className={styles.tabs}
+          aria-label={`${profile.display_name}님의 목록`}
+        >
+          {tabs.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={styles.tab}
+              aria-current={activeTab === item.key ? "page" : undefined}
+              scroll={false}
             >
-              <FollowButton
-                key={profile.id}
-                userId={viewer.id}
-                targetId={profile.id}
-                following={relationship.following}
-              />
-            </SessionBoundary>
+              <span className={`num ${styles.tabCount}`}>{item.count}</span>
+              <span className={styles.tabLabel}>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+        {activeTab === "posts" &&
+          posts &&
+          (!posts.ok ? (
+            <ErrorState
+              title="글을 불러오지 못했어요"
+              action={
+                <ButtonLink href={href} variant="secondary">
+                  <Icon name="refresh" size={18} /> 다시 불러오기
+                </ButtonLink>
+              }
+            />
           ) : (
-            <ServiceError
-              message="팔로우 상태를 확인하지 못했습니다."
-              href={href}
+            <FeedList
+              key={`posts-${profile.id}`}
+              initial={posts.items}
+              next={posts.next}
+              scope="author"
+              authorId={profile.id}
+              endText={`${profile.display_name}님의 첫 글까지 왔어요.`}
+              empty={
+                <EmptyState
+                  tone={toneFor(profile.id)}
+                  icon="compose"
+                  title={self ? "아직 쓴 글이 없어요" : "아직 글이 없어요"}
+                  actions={
+                    self ? <ComposeButton>첫 글 쓰기</ComposeButton> : null
+                  }
+                >
+                  {self
+                    ? "첫 글은 짧아도 좋아요. 지금 떠오르는 한 줄이면 충분해요."
+                    : `${profile.display_name}님이 글을 쓰면 여기에 보여요.`}
+                </EmptyState>
+              }
             />
           ))}
-        {viewer.status === "guest" && (
-          <Link className="text-link" href="/login">
-            로그인하고 팔로우하기
-          </Link>
-        )}
-        {viewer.status === "onboarding" && (
-          <Link className="text-link" href="/onboarding">
-            프로필 설정 후 팔로우하기
-          </Link>
-        )}
-        {viewer.status === "error" && (
-          <p className="error">
-            로그인 상태를 확인하지 못했습니다. 새로고침해 주세요.
-          </p>
-        )}
-      </section>
-      <nav className="profile-tabs" aria-label="프로필 목록">
-        <Link href={href} aria-current={tab === "posts" ? "page" : undefined}>
-          글
-        </Link>
-        <Link
-          href={`${href}?tab=followers`}
-          aria-current={tab === "followers" ? "page" : undefined}
-        >
-          팔로워 {profile.followers[0]?.count ?? 0}
-        </Link>
-        <Link
-          href={`${href}?tab=following`}
-          aria-current={tab === "following" ? "page" : undefined}
-        >
-          팔로잉 {profile.following[0]?.count ?? 0}
-        </Link>
-      </nav>
-      {posts &&
-        (!posts.ok ? (
-          <ServiceError message="글을 불러오지 못했습니다." href={href} />
-        ) : posts.posts.length ? (
-          posts.posts.map((post) => <PostRow key={post.id} post={post} />)
-        ) : (
-          <p className="empty muted">
-            {offset > 0
-              ? "이 페이지에 표시할 글이 없습니다. 처음 목록을 확인해 주세요."
-              : "아직 작성한 글이 없습니다."}
-          </p>
-        ))}
-      {connections &&
-        (!connections.ok ? (
-          <ServiceError
-            message={`${tab === "followers" ? "팔로워" : "팔로잉"} 목록을 불러오지 못했습니다.`}
-            href={`${href}?tab=${tab}`}
-          />
-        ) : connections.people.length ? (
-          <ul className="person-list">
-            {connections.people.map((person) => (
-              <PersonRow key={person.id} person={person} />
-            ))}
-          </ul>
-        ) : (
-          <p className="empty muted">
-            {offset > 0
-              ? `이 페이지에 표시할 ${tab === "followers" ? "팔로워가" : "팔로잉한 사람이"} 없습니다. 처음 목록을 확인해 주세요.`
-              : `아직 ${tab === "followers" ? "팔로워가" : "팔로잉한 사람이"} 없습니다.`}
-          </p>
-        ))}
-      <div className="feed-footer actions">
-        {offset > 0 && (
-          <Link className="text-link" href={`${href}?tab=${tab}`}>
-            처음으로
-          </Link>
-        )}
-        {hasMore && (
-          <Link
-            className="button button-outline"
-            href={`${href}?tab=${tab}&offset=${offset + PAGE_SIZE}`}
-          >
-            더 보기
-          </Link>
-        )}
+        {activeTab !== "posts" &&
+          people &&
+          (!people.ok ? (
+            <ErrorState
+              title="목록을 불러오지 못했어요"
+              action={
+                <ButtonLink
+                  href={`${href}?tab=${activeTab}`}
+                  variant="secondary"
+                >
+                  <Icon name="refresh" size={18} /> 다시 불러오기
+                </ButtonLink>
+              }
+            />
+          ) : (
+            <PeopleList
+              key={`${activeTab}-${profile.id}`}
+              initial={people.items}
+              next={people.next}
+              layout="rows"
+              profileId={profile.id}
+              tab={activeTab}
+              endText={
+                activeTab === "followers"
+                  ? "팔로워를 모두 봤어요."
+                  : "팔로잉을 모두 봤어요."
+              }
+              empty={
+                <EmptyState
+                  tone={activeTab === "followers" ? "lime" : "orchid"}
+                  icon={activeTab === "followers" ? "people" : "follow"}
+                  title={
+                    activeTab === "followers"
+                      ? "아직 팔로워가 없어요"
+                      : "아직 팔로우한 사람이 없어요"
+                  }
+                  actions={
+                    self && activeTab === "following" ? (
+                      <ButtonLink href="/people">
+                        <Icon name="people" size={18} /> 사람들 둘러보기
+                      </ButtonLink>
+                    ) : null
+                  }
+                >
+                  {activeTab === "followers"
+                    ? self
+                      ? "글을 쓰고 대화에 참여하면 곁에 두려는 사람이 생겨요."
+                      : `${profile.display_name}님을 처음으로 팔로우해 보세요.`
+                    : self
+                      ? "마음이 가는 사람을 팔로우하면 여기에 모여요."
+                      : `${profile.display_name}님은 아직 아무도 팔로우하지 않았어요.`}
+                </EmptyState>
+              }
+            />
+          ))}
       </div>
-    </>
+      <aside className="page-aside" aria-label="사이트 정보">
+        <SiteFoot shortcut={viewer.status === "ready"} />
+      </aside>
+    </div>
   );
 }
